@@ -1,0 +1,49 @@
+/* date = July 30th 2025 8:06 pm */
+
+#ifndef COMMON_LAYER_H
+#define COMMON_LAYER_H
+
+#include "opengl/framebuffer.h"
+#include "platform_api.h"
+
+#define DLL_API extern "C" __declspec(dllexport)
+
+struct window
+{
+    u32                                              Width;
+    u32                                              Height;
+    b32                                              Resized;
+};
+
+struct button_state
+{
+    b32                                              IsDown;
+    b32                                              HeldDown;
+    b32                                              IsReleased;
+    b32                                              JustWentDown;
+};
+
+struct mouse_input
+{
+    v2                                               Position;
+    v2                                               Mapped;
+    button_state                                     Left;
+    button_state                                     Right;
+};
+
+struct input
+{
+    f32                                              dt;
+    mouse_input                                      Mouse;
+};
+
+#define Game_Update_And_Render(Name) void Name(\
+platform_api* PlatformApi,\
+input* Input,\
+window* Window,\
+void* Memory)
+Game_Update_And_Render(GameUpdateAndRenderStub){}
+
+typedef Game_Update_And_Render(game_update_and_render);
+
+#endif //COMMON_LAYER_H

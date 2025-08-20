@@ -1,0 +1,124 @@
+function ImplementInitFunction(typeName) {
+    const functionDefinition = `
+void InitList(memory_arena* arena, ${typeName}_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (${typeName}*)GetMemory(arena,Size * sizeof(${typeName}));
+    List->Initialized = true;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementDeinitFunction(typeName) {
+    const functionDefinition = `
+void DeInitList(${typeName}_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementResetListFunction(typeName) {
+    const functionDefinition = `
+void ResetList(${typeName}_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementInsertItemFunction(typeName) {
+    const functionDefinition = `
+${typeName}* InsertItem(${typeName}_list* List, ${typeName}* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    ${typeName}* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementPushItemAtFrontFunction(typeName) {
+    const functionDefinition = `
+void InsertItemFront(${typeName}_list* List, ${typeName}* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementPopItemFront(typeName) {
+    const functionDefinition = `
+void PopItemFront(${typeName}_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    `;
+    return functionDefinition;
+}
+
+function ImplementGetItemFunction(typeName) {
+    const functionDefinition = `
+${typeName}* GetItemPointer(${typeName}_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    ${typeName}* ptr = List->Items + Index;
+    return ptr;
+}
+    `;
+    const functionDefinition2 = `
+${typeName} GetItem(${typeName}_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    ${typeName}* ptr = List->Items + Index;
+    return *ptr;
+}
+    `;
+    return functionDefinition + functionDefinition2;
+}
+
+function something() {
+    const lists = [
+        'game_v2_interpolated'
+    ];
+    let string = '// Generated code';
+    lists.forEach((l) => {
+        string += ImplementResetListFunction(l);
+        string += ImplementInitFunction(l);
+        string += ImplementInsertItemFunction(l);
+        string += ImplementGetItemFunction(l);
+        string += ImplementDeinitFunction(l);
+        string += ImplementPushItemAtFrontFunction(l);
+        string += ImplementPopItemFront(l);
+    });
+    return string;
+}
+
+console.log(something());
