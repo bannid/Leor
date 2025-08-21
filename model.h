@@ -16,12 +16,15 @@ struct leor_mesh
     // TODO(Banni): We will just put these vertices in order maybe?
     // Or should we use EBO?
     leor_vertex_list Vertices;
+    b32 LoadedToGPU;
+    u32 GPUId;
 };
 Declare_List(leor_mesh);
 
 struct leor_model
 {
     leor_mesh_list Meshes;
+    b32 LoadedToGPU;
 };
 
 #endif //MODEL_H

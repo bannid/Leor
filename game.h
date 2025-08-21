@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "common_layer.h"
 #include "arena.h"
+#include "model.h"
 
 struct game_state
 {

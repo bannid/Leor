@@ -33,7 +33,6 @@
 #include "opengl/framebuffer.h"
 #include "opengl/framebuffer.cpp"
 #include "opengl/model.h"
-#include "opengl/model.cpp"
 #include "opengl/shader.h"
 #include "opengl/shader.cpp"
 #include "opengl/texture.h"
@@ -50,6 +49,7 @@
 #include "lists_utils.cpp"
 
 #include "model.cpp"
+#include "opengl/model.cpp"
 
 #include "game.h"
 #define ASPECT_RATIO (16.0f / 9.0f)
@@ -118,9 +118,9 @@ int CALLBACK WinMain(HINSTANCE instance,
                &Model
                );
     // TODO(Banni): Load the model to open gl
+    LoadLModelToGPU(&Model);
     
-    // NOTE(Banni): Reset the arena after loading the model(s)
-    ResetArena(&LoadModelArena);
+    // TODO(Banni): How to free up the memory that was used by the model loading?
     
     while(1)
     {
