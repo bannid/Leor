@@ -10,11 +10,18 @@ struct leor_vertex
     v2 TextureCoords;
 };
 Declare_List(leor_vertex);
+
 struct leor_mesh
 {
     // TODO(Banni): We will just put these vertices in order maybe?
     // Or should we use EBO?
     leor_vertex_list Vertices;
+};
+Declare_List(leor_mesh);
+
+struct leor_model
+{
+    leor_mesh_list Meshes;
 };
 
 #endif //MODEL_H

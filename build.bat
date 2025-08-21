@@ -17,10 +17,10 @@ set LibsWin32= kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advap
 
 set LibsFbxImporter= assimp.lib
 
-rem cl /DDEBUG /FeLeor.exe /MD -FC -Zi %FilesWin32Engine% /I %Includes% /link %LibsPath% %LibsWin32%  /NODEFAULTLIB:MSVCRTD -subsystem:windows
+cl /DDEBUG  /FeLeor.exe /MD -FC -Zi %FilesWin32Engine% /I %Includes% /link %LibsPath% %LibsWin32%  /NODEFAULTLIB:MSVCRTD -subsystem:windows
 
 rem cl /DDEBUG /LD ..\game.cpp /I %Includes% -Zi /link -PDB:game_%random%.pdb
 
-cl /DDEBUG /FeFBXImporter.exe /MD -FC -Zi %FileFBXImporter% /I %Includes% /link %LibsPath% %LibsFbxImporter%  /NODEFAULTLIB:MSVCRTD -subsystem:console
+rem cl /DDEBUG /FeFBXImporter.exe /MD -FC -Zi %FileFBXImporter% /I %Includes% /link %LibsPath% %LibsFbxImporter%  /NODEFAULTLIB:MSVCRTD -subsystem:console
 
 popd

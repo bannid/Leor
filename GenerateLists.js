@@ -107,7 +107,8 @@ ${typeName} GetItem(${typeName}_list* List,u32 Index)
 function something() {
     const lists = [
         'entity',
-        'leor_vertex'
+        'leor_vertex',
+        'leor_mesh'
     ];
     let string = '// Generated code';
     lists.forEach((l) => {

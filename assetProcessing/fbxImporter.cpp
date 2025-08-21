@@ -25,8 +25,7 @@ void WriteMeshFile(const char* FileName,
 
 asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
 {
-    leor_vertex* Vertices = new leor_vertex[Mesh->mNumVertices];
-    
+    leor_vertex* Vertices = (leor_vertex*)malloc(sizeof(leor_vertex) * Mesh->mNumVertices);   
     for(int32 i = 0; i < Mesh->mNumVertices; i++)
     {
         leor_vertex* Vertex = Vertices + i;
@@ -48,7 +47,7 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
         TotalNumberOfVertices += Mesh->mFaces[i].mNumIndices;
     }
     
-    leor_vertex* Faces = new leor_vertex[TotalNumberOfVertices];
+    leor_vertex* Faces = (leor_vertex*)malloc(sizeof(leor_vertex) * TotalNumberOfVertices);
     
     for(int32 i = 0; i < Mesh->mNumFaces; i++)
     {
@@ -61,6 +60,7 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
         Faces[i * 3 + 2] = Third;
     }
     
+    free(Vertices);
     return
     {
         TotalNumberOfVertices,

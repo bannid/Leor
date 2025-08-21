@@ -3,11 +3,14 @@
 #ifndef ASSET_H
 #define ASSET_H
 
+#if !defined(LEOR)
+
 #include "../debug.h"
 #include "../utils.h"
 #include "../types.h"
 #include "../model.h"
 
+#endif
 // NOTE(Banni): This is how the mesh is stored in the 
 // filesystem
 struct asset_leor_mesh

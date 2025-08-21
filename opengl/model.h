@@ -1,7 +1,7 @@
 /* date = July 29th 2025 6:56 pm */
 
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef GL_MODEL_H
+#define GL_MODEL_H
 
 struct gl_model
 {

@@ -47,8 +47,9 @@
 #include "renderer/renderer.h"
 #include "renderer/renderer.cpp"
 
-#include "lists.h"
 #include "lists_utils.cpp"
+
+#include "model.cpp"
 
 #include "game.h"
 #define ASPECT_RATIO (16.0f / 9.0f)
@@ -96,7 +97,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     // NOTE(Banni): If we failed to get memory from the OS.
     if(MainMemoryArena.BasePointer == NULL) return -1;
     memory_arena ScratchArena = GetMemoryArena(&MainMemoryArena,
-                                               MEGABYTE(2));
+                                               MEGABYTE(10));
     win32_game_code GameCode = Win32LoadGameDLL(false);
     input Input;
     
@@ -107,6 +108,19 @@ int CALLBACK WinMain(HINSTANCE instance,
     
     scene DefaultScene = {};
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
+    
+    memory_arena LoadModelArena = GetMemoryArena(&MainMemoryArena,
+                                                 MEGABYTE(10));
+    leor_model Model = {};
+    LoadLModel("..\\assetsProcessed\\model.lmodel",
+               &LoadModelArena,
+               ScratchArena,
+               &Model
+               );
+    // TODO(Banni): Load the model to open gl
+    
+    // NOTE(Banni): Reset the arena after loading the model(s)
+    ResetArena(&LoadModelArena);
     
     while(1)
     {
