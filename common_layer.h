@@ -3,8 +3,8 @@
 #ifndef COMMON_LAYER_H
 #define COMMON_LAYER_H
 
-#include "opengl/framebuffer.h"
-#include "platform_api.h"
+#include "transform.h"
+#include "scene.h"
 
 #define DLL_API extern "C" __declspec(dllexport)
 
@@ -37,13 +37,11 @@ struct input
     mouse_input                                      Mouse;
 };
 
-#define Game_Update_And_Render(Name) void Name(\
-platform_api* PlatformApi,\
-input* Input,\
-window* Window,\
+#define Game_Update(Name) void Name(input* Input,\
+scene* Scene,\
 void* Memory)
-Game_Update_And_Render(GameUpdateAndRenderStub){}
+Game_Update(GameUpdateStub){}
 
-typedef Game_Update_And_Render(game_update_and_render);
+typedef Game_Update(game_update);
 
 #endif //COMMON_LAYER_H

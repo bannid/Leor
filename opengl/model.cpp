@@ -1,4 +1,4 @@
-model QuadModelBottomLeftAligned()
+gl_model QuadModelBottomLeftAligned()
 {
     
     f32 z = 0.0f;
@@ -25,14 +25,14 @@ model QuadModelBottomLeftAligned()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, Stride * sizeof(f32), (void*)(3 * sizeof(f32)));
     glEnableVertexAttribArray(1);
     glBindVertexArray(0);
-    model Model = {};
+    gl_model Model = {};
     Model.VaoID = VAO;
     Model.VboID = VBO;
     Model.VertCount = 6;
     return Model;
 }
 
-model QuadModelCenterAligned()
+gl_model QuadModelCenterAligned()
 {
     f32 z = 0.0f;
     f32 e = .5f;
@@ -59,14 +59,14 @@ model QuadModelCenterAligned()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, Stride * sizeof(f32), (void*)(3 * sizeof(f32)));
     glEnableVertexAttribArray(1);
     glBindVertexArray(0);
-    model Model = {};
+    gl_model Model = {};
     Model.VaoID = VAO;
     Model.VboID = VBO;
     Model.VertCount = 6;
     return Model;
 }
 
-model LoadQuadModel(b32 CenterAligned)
+gl_model LoadQuadModel(b32 CenterAligned)
 {
     if(CenterAligned) return QuadModelCenterAligned();
     return QuadModelBottomLeftAligned();

@@ -3,7 +3,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-struct model
+struct gl_model
 {
     u32 VaoID;
     u32 VboID;

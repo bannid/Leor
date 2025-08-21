@@ -32,14 +32,14 @@ Win32LoadGameDLL(b32 Loop)
     
     if(Result.GameCodeDLL)
     {
-        Result.GameUpdateAndRender = (game_update_and_render*)GetProcAddress(Result.GameCodeDLL,
-                                                                             "GameUpdateAndRender");
-        Result.Valid = Result.GameUpdateAndRender != NULL;
+        Result.GameUpdate = (game_update*)GetProcAddress(Result.GameCodeDLL,
+                                                         "GameUpdate");
+        Result.Valid = Result.GameUpdate != NULL;
     }
     
     if(!Result.Valid)
     {
-        Result.GameUpdateAndRender = GameUpdateAndRenderStub;
+        Result.GameUpdate = GameUpdateStub;
         DEBUG_PRINT("Failed to load game DLL");
     }
     
@@ -55,5 +55,5 @@ Win32UnloadGameDLL(win32_game_code* GameCode)
         FreeLibrary(GameCode->GameCodeDLL);
         GameCode->Valid = false;
     }
-    GameCode->GameUpdateAndRender = GameUpdateAndRenderStub;
+    GameCode->GameUpdate = GameUpdateStub;
 }

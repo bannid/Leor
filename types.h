@@ -13,6 +13,7 @@ typedef glm::vec3 v3;
 typedef glm::vec2 v2;
 typedef glm::mat4 mat4;
 typedef glm::ivec2 iv2;
+typedef glm::quat quat;
 typedef v4 col4;
 typedef v3 col3;
 

@@ -12,35 +12,12 @@
 #include "utils.h"
 #include "common_layer.h"
 #include "arena.h"
-#include "game_random.h"
-#include "ui.h"
-#include "game_interpolateds.h"
-
-#include "game_lists.h"
-
-// NOTE(Banni): Area to draw the game on screen.
-struct game_area
-{
-    u32                                                Width;
-    u32                                                Height;
-    u32                                                XOffset;
-    u32                                                YOffset;
-};
 
 struct game_state
 {
-    layer                                               Layer;
-    f32                                                 WorldWidth;
-    f32                                                 WorldHeight;
-    game_area                                           GameArea;
     b32                                                 Initialized;
     b32                                                 GameReloaded;
     memory_arena                                        Arena;
-    game_random                                         Random;
-    game_v2_interpolated_list                           Interpolateds;
-    // NOTE(Banni): Game
-    
-    
 };
 
 #endif //GAME_H

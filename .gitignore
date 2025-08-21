@@ -10,7 +10,8 @@ build/
 .vscode
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+assetsProcessed
+assets
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

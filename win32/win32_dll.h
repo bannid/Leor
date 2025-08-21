@@ -6,7 +6,7 @@
 struct win32_game_code
 {
     HMODULE GameCodeDLL;
-    game_update_and_render* GameUpdateAndRender;
+    game_update* GameUpdate;
     b32 Valid;
     FILETIME LastWriteTime;
 };

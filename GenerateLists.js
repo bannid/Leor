@@ -106,7 +106,8 @@ ${typeName} GetItem(${typeName}_list* List,u32 Index)
 
 function something() {
     const lists = [
-        'game_v2_interpolated'
+        'entity',
+        'leor_vertex'
     ];
     let string = '// Generated code';
     lists.forEach((l) => {
