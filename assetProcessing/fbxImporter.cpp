@@ -84,9 +84,9 @@ void ProcessNode(aiNode* Node,
 }
 
 void
-WriteModelFile(const std::vector<asset_leor_mesh>* Meshes)
+WriteModelFile(const char* FileName, const std::vector<asset_leor_mesh>* Meshes)
 {
-    FILE* FileToWrite = fopen("..\\assetsProcessed\\model.lmodel", "wb");
+    FILE* FileToWrite = fopen(FileName, "wb");
     
     asset_leor_model_header Header;
     Header.NumberOfMeshes = Meshes->size();
@@ -122,6 +122,49 @@ WriteModelFile(const std::vector<asset_leor_mesh>* Meshes)
     
 }
 
+u32 GetFileSize(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return st.st_size;
+    } else {
+        perror("Error getting file size");
+        return -1;
+    }
+}
+
+// Note(Banni): This is how we read the processed file
+void 
+TestTheWrittenFile(const char* FileName)
+{
+    u32 FileWrittenSize = GetFileSize(FileName);
+    u8* MemoryToReadWrittenFile = (u8*)malloc(FileWrittenSize);
+    FILE* WrittenFile = fopen(FileName, "rb");
+    fread(MemoryToReadWrittenFile, FileWrittenSize, 1, WrittenFile);
+    fclose(WrittenFile);
+    asset_leor_model_header* Header = (asset_leor_model_header*)MemoryToReadWrittenFile;
+    std::cout << "Number of meshes: "
+        << Header->NumberOfMeshes
+        << std::endl;
+    asset_leor_mesh_header_info* MeshHeaders = (asset_leor_mesh_header_info*)
+        (MemoryToReadWrittenFile + sizeof(asset_leor_model_header));
+    for(int32 i = 0; i < Header->NumberOfMeshes; i++)
+    {
+        asset_leor_mesh_header_info* MeshHeader = MeshHeaders + i;
+        std::cout << "Mesh at position:"
+            << i 
+            << " has: "
+            << MeshHeader->NumberOfVertices;
+        leor_vertex* vertices = (leor_vertex*)(MemoryToReadWrittenFile + Header->DataOffset + MeshHeader->Offset);
+        for(int32 j = 0; j < MeshHeader->NumberOfVertices; j++)
+        {
+            leor_vertex* vertex = vertices + j;
+
+        }
+    }
+
+    free(MemoryToReadWrittenFile);
+}
+
 int main()
 {
     const char* Path = "..\\assets\\House_4.fbx";
@@ -143,7 +186,12 @@ int main()
     }
     std::vector<asset_leor_mesh> Meshes;
     ProcessNode(Scene->mRootNode, Scene, &Meshes);
-    WriteModelFile(&Meshes);
+    const char* FileToWriteName = "..\\assetsProcessed\\model.lmodel";
+    WriteModelFile(FileToWriteName, &Meshes);
+    // NOTE(Banni): Just for test
+    TestTheWrittenFile(FileToWriteName);
+    //End test
+    
     std::cout << "Finished"
         << std::endl;
     return 0;
