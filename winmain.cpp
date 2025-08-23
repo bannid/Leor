@@ -112,7 +112,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     memory_arena LoadModelArena = GetMemoryArena(&MainMemoryArena,
                                                  MEGABYTE(10));
     leor_model Model = {};
-    LoadLModel("..\\assetsProcessed\\model.lmodel",
+    LoadLModel("..\\assetsProcessed\\Inn.fbx.lmodel",
                &LoadModelArena,
                ScratchArena,
                &Model
@@ -122,6 +122,24 @@ int CALLBACK WinMain(HINSTANCE instance,
     
     // TODO(Banni): How to free up the memory that was used by the model loading?
     
+    transform Camera;
+    InitTransform(&Camera);
+    Camera.Rotation = glm::quatLookAt(v3(0,0,1), v3(0,1,0));
+    
+    glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f), 1.0f,
+                                               .1f,
+                                               100.0f);
+    gl_model Cube = LoadCubeToGPU();
+    
+    transform EntityTransform;
+    InitTransform(&EntityTransform);
+    EntityTransform.Position = v3(0,0,20);
+    EntityTransform.Scale = v3(2);
+    
+    shader_program MainShader = LoadShaderFromFile("../shaders/main.vs.c",
+                                                   "../shaders/main.fs.c",
+                                                   ScratchArena);
+    f32 DeltaTime = 1.0f / 75.0f;
     while(1)
     {
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
@@ -135,12 +153,46 @@ int CALLBACK WinMain(HINSTANCE instance,
         // TODO(Banni): Get the delta time
         //Input.dt = TargetSecondsPerFrame;
         GlfwProcessInput(Renderer.Window, &Input);
+        
+#if 0        
         GameCode.GameUpdate(&Input,
                             &DefaultScene,
                             (void*)GameState);
-        
         // TODO(Banni): Render the default scene
         DrawScene(&Renderer, &DefaultScene);
+#endif
+        
+        // NOTE(Banni): TEST CODE
+        
+        glm::quat Q = glm::angleAxis(glm::radians(10.0f) * DeltaTime,
+                                     glm::vec3(1,0,0));
+        EntityTransform.Rotation = Q * EntityTransform.Rotation;
+        glClearColor(.0, .0, .0, .0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 ViewMat = glm::inverse(TransformToMat4(&Camera));
+        glm::mat4 ModelMat = TransformToMat4(&EntityTransform);
+        glUseProgram(MainShader.ID);
+        glUniformMatrix4fv(glGetUniformLocation(MainShader.ID, "uProjection"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(ProjectionMat));
+        glUniformMatrix4fv(glGetUniformLocation(MainShader.ID, "uModel"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(ModelMat));
+        glUniformMatrix4fv(glGetUniformLocation(MainShader.ID, "uView"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(ViewMat));     
+        
+        for(int32 i = 0; i < Model.Meshes.Length; i++)
+        {
+            leor_mesh* Mesh = GetItemPointer(&Model.Meshes, i);
+            glBindVertexArray(Mesh->GPUId);
+            glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
+        }
+        // NOTE(Banni): End test code
+        
         glfwSwapBuffers(Renderer.Window);
         glfwPollEvents();
         if(!RendererRunning(&Renderer))

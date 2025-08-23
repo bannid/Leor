@@ -28,7 +28,7 @@ LoadLModel(const char* FilePath,
             
             for(int32 j = 0; j < MeshHeader->NumberOfVertices; j++)
             {
-                leor_vertex Vertex = Vertices[i];
+                leor_vertex Vertex = Vertices[j];
                 InsertItem(&Mesh.Vertices, &Vertex);
             }
             InsertItem(&Model->Meshes, &Mesh);

@@ -132,6 +132,33 @@ u32 GetFileSize(const char *filename) {
     }
 }
 
+void PrintV3(v3& V)
+{
+    std::cout << "("
+        << V.x
+        << ","
+        << V.y
+        << ","
+        << V.z
+        << ")"
+        <<std::endl;
+}
+
+void PrintMeshVertices(std::vector<asset_leor_mesh>* Meshes)
+{
+    for(int32 i = 0; i < Meshes->size(); i++)
+    {
+        asset_leor_mesh* Mesh = &Meshes->at(i);
+        for(int32 j = 0; j < Mesh->NumberOfVertices; j++)
+        {
+            leor_vertex* Vertex = Mesh->Vertices + j;
+            PrintV3(Vertex->Position);
+        }
+        
+    }
+}
+
+
 // Note(Banni): This is how we read the processed file
 void 
 TestTheWrittenFile(const char* FileName)
@@ -146,7 +173,7 @@ TestTheWrittenFile(const char* FileName)
         << Header->NumberOfMeshes
         << std::endl;
     asset_leor_mesh_header_info* MeshHeaders = (asset_leor_mesh_header_info*)
-        (MemoryToReadWrittenFile + sizeof(asset_leor_model_header));
+    (MemoryToReadWrittenFile + sizeof(asset_leor_model_header));
     for(int32 i = 0; i < Header->NumberOfMeshes; i++)
     {
         asset_leor_mesh_header_info* MeshHeader = MeshHeaders + i;
@@ -154,20 +181,31 @@ TestTheWrittenFile(const char* FileName)
             << i 
             << " has: "
             << MeshHeader->NumberOfVertices;
-        leor_vertex* vertices = (leor_vertex*)(MemoryToReadWrittenFile + Header->DataOffset + MeshHeader->Offset);
+        leor_vertex* Vertices = (leor_vertex*)(MemoryToReadWrittenFile + Header->DataOffset + MeshHeader->Offset);
         for(int32 j = 0; j < MeshHeader->NumberOfVertices; j++)
         {
-            leor_vertex* vertex = vertices + j;
-
+            leor_vertex* Vertex = Vertices + j;
+            PrintV3(Vertex->Position);
+            
         }
     }
-
+    
     free(MemoryToReadWrittenFile);
 }
 
-int main()
+
+int main(int argc, char* argv[])
 {
-    const char* Path = "..\\assets\\House_4.fbx";
+    std::string BasePath = "../assets/";
+    if(argc != 2)
+    {
+        std::cout << "[USAGE]: fbxImporter.exe {FileName}";
+        return 1;
+    }
+    std::string FileName = argv[1];
+    std::string FullPath = BasePath + FileName;
+    const char* Path = FullPath.c_str();
+    std::cout << "Processing file at: " << Path;
     Assimp::Importer Importer;
     const aiScene* Scene = Importer.ReadFile(Path,
                                              aiProcess_Triangulate |
@@ -186,11 +224,21 @@ int main()
     }
     std::vector<asset_leor_mesh> Meshes;
     ProcessNode(Scene->mRootNode, Scene, &Meshes);
-    const char* FileToWriteName = "..\\assetsProcessed\\model.lmodel";
+    
+#if 0    
+    PrintMeshVertices(&Meshes);
+    std::cout << "---------------------------" << std::endl;
+#endif
+    
+    std::string PathOut = "../assetsProcessed/" + FileName + ".lmodel";
+    const char* FileToWriteName = PathOut.c_str();
     WriteModelFile(FileToWriteName, &Meshes);
+    
+#if 0     
     // NOTE(Banni): Just for test
     TestTheWrittenFile(FileToWriteName);
     //End test
+#endif
     
     std::cout << "Finished"
         << std::endl;
