@@ -11,6 +11,8 @@ struct camera
 struct entity
 {
     transform Transform;
+    // TODO(Banni): Temp
+    leor_model* Model;
 };
 
 struct entity_list

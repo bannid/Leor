@@ -33,10 +33,39 @@ RendererRunning(renderer* Renderer)
 }
 
 void 
-DrawScene(renderer* Renderer, scene* Scene)
+DrawScene(renderer* Renderer,
+          scene* Scene,
+          shader_program* Shader,
+          glm::mat4* Projection)
 {
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(1,1,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glm::mat4 ViewMat = TransformToMat4(&Scene->Camera.Transform);
+    glUseProgram(Shader->ID);
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(*Projection));
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uView"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(ViewMat));     
+    for(int32 j = 0; j < Scene->Entites.Length; j++)
+    {
+        
+        entity* Entity = GetItemPointer(&Scene->Entites, j);
+        glm::mat4 ModelMat = TransformToMat4(&Entity->Transform);
+        glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uModel"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(ModelMat));
+        for(int32 i = 0; i < Entity->Model->Meshes.Length; i++)
+        {
+            leor_mesh* Mesh = GetItemPointer(&Entity->Model->Meshes, i);
+            glBindVertexArray(Mesh->GPUId);
+            glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
+        }
+    }
+    
 }

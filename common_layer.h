@@ -3,8 +3,18 @@
 #ifndef COMMON_LAYER_H
 #define COMMON_LAYER_H
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "types.h"
+#include "debug.h"
+#include "utils.h"
 #include "transform.h"
+#include "model.h"
 #include "scene.h"
+#include "arena.h"
+#include "platform_api.h"
 
 #define DLL_API extern "C" __declspec(dllexport)
 
@@ -37,7 +47,8 @@ struct input
     mouse_input                                      Mouse;
 };
 
-#define Game_Update(Name) void Name(input* Input,\
+#define Game_Update(Name) void Name(platform_api* PlatformApi,\
+input* Input,\
 scene* Scene,\
 void* Memory)
 Game_Update(GameUpdateStub){}
