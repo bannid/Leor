@@ -36,12 +36,13 @@ void
 DrawScene(renderer* Renderer,
           scene* Scene,
           shader_program* Shader,
-          glm::mat4* Projection)
+          glm::mat4* Projection,
+          leor_model_list* Models)
 {
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glm::mat4 ViewMat = TransformToMat4(&Scene->Camera.Transform);
+    glm::mat4 ViewMat = glm::inverse(TransformToMat4(&Scene->Camera.Transform));
     glUseProgram(Shader->ID);
     glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
                        1,
@@ -60,9 +61,10 @@ DrawScene(renderer* Renderer,
                            1,
                            GL_FALSE,
                            glm::value_ptr(ModelMat));
-        for(int32 i = 0; i < Entity->Model->Meshes.Length; i++)
+        leor_model* Model = GetItemPointer(Models, Entity->ModelIndex);
+        for(int32 i = 0; i < Model->Meshes.Length; i++)
         {
-            leor_mesh* Mesh = GetItemPointer(&Entity->Model->Meshes, i);
+            leor_mesh* Mesh = GetItemPointer(&Model->Meshes, i);
             glBindVertexArray(Mesh->GPUId);
             glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
         }

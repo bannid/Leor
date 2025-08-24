@@ -108,7 +108,8 @@ function something() {
     const lists = [
         'entity',
         'leor_vertex',
-        'leor_mesh'
+        'leor_mesh',
+        'leor_model'
     ];
     let string = '// Generated code';
     lists.forEach((l) => {

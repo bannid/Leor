@@ -10,8 +10,10 @@ struct game_state
     b32                                                 Initialized;
     b32                                                 GameReloaded;
     memory_arena                                        Arena;
-    leor_model                                          Model;
+    u32                                                 CubeModel;
     transform                                           Camera;
+    
+    entity*                                             Player;
 };
 
 #endif //GAME_H

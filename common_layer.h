@@ -41,10 +41,19 @@ struct mouse_input
     button_state                                     Right;
 };
 
+struct keyboard_input
+{
+    button_state                                     Up;
+    button_state                                     Down;
+    button_state                                     Left;
+    button_state                                     Right;
+};
+
 struct input
 {
     f32                                              dt;
     mouse_input                                      Mouse;
+    keyboard_input                                   Keyboard;
 };
 
 #define Game_Update(Name) void Name(platform_api* PlatformApi,\

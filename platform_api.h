@@ -3,7 +3,7 @@
 #ifndef PLATFORM_API_H
 #define PLATFORM_API_H
 
-#define Load_L_Model(Name) void Name(const char* Path, leor_model* Model, memory_arena* Arena);
+#define Load_L_Model(Name) u32 Name(const char* Path);
 typedef Load_L_Model(load_l_model);
 
 #define Exit_Game(Name) void Name()

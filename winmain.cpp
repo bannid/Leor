@@ -67,7 +67,8 @@ void GlfwCheckState(button_state* ButtonState,
 
 void GlfwProcessInput(GLFWwindow* Window, input* Input)
 {
-    local_persist mouse_input LastFrameMouse;
+    local_persist mouse_input         LastFrameMouse;
+    local_persist keyboard_input      LastFrameKeyboard;
     
     // NOTE(Banni): Mouse input
     real64 x;
@@ -82,23 +83,44 @@ void GlfwProcessInput(GLFWwindow* Window, input* Input)
     GlfwCheckState(&Input->Mouse.Right,
                    LastFrameMouse.Right,
                    glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT));
+    
+    GlfwCheckState(&Input->Keyboard.Up,
+                   LastFrameKeyboard.Up,
+                   glfwGetKey(Window, GLFW_KEY_UP));
+    GlfwCheckState(&Input->Keyboard.Down,
+                   LastFrameKeyboard.Down,
+                   glfwGetKey(Window, GLFW_KEY_DOWN));
+    GlfwCheckState(&Input->Keyboard.Right,
+                   LastFrameKeyboard.Right,
+                   glfwGetKey(Window, GLFW_KEY_RIGHT));
+    GlfwCheckState(&Input->Keyboard.Left,
+                   LastFrameKeyboard.Left,
+                   glfwGetKey(Window, GLFW_KEY_LEFT));
+    
     LastFrameMouse = Input->Mouse;
+    LastFrameKeyboard = Input->Keyboard;
 }
 
-global memory_arena GlobalScractchArena;
+global memory_arena    GlobalScractchArena;
+global memory_arena    GlobalModelsMemoryArena;
+global leor_model_list GlobalModelsList;
 
-void LoadLModelAndUploadToGPU(const char* Path,
-                              leor_model* Model,
-                              memory_arena* Arena)
+u32 LoadLModelAndUploadToGPU(const char* Path)
 {
-    LoadLModel(Path, Arena, GlobalScractchArena, Model);
-    LoadLModelToGPU(Model);
+    leor_model Model = {};
+    LoadLModel(Path,
+               &GlobalModelsMemoryArena,
+               GlobalScractchArena,
+               &Model);
+    LoadLModelToGPU(&Model);
+    InsertItem(&GlobalModelsList, &Model);
+    return GlobalModelsList.Length - 1;
 }
 
-const int32 WIDTH = 1600;
-const int32 HEIGHT = 900;
+const int32 WIDTH = 1920;
+const int32 HEIGHT = 1080;
 
-const f32 ASPECT_RATIO = 1600.0f / 900.0f;
+const f32 ASPECT_RATIO = 1920.0f / 1080.0f;
 
 int CALLBACK WinMain(HINSTANCE instance,
 					 HINSTANCE prevInstance,
@@ -121,11 +143,14 @@ int CALLBACK WinMain(HINSTANCE instance,
     ZeroMemory(GameState, sizeof(game_state));
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
     
+    GlobalModelsList = {};
+    InitList(&MainMemoryArena, &GlobalModelsList, 100);
+    
     scene DefaultScene = {};
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
     
-    memory_arena LoadModelArena = GetMemoryArena(&MainMemoryArena,
-                                                 MEGABYTE(10));
+    GlobalModelsMemoryArena = GetMemoryArena(&MainMemoryArena,
+                                             MEGABYTE(10));
     
     glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f), 
                                                ASPECT_RATIO,
@@ -147,11 +172,15 @@ int CALLBACK WinMain(HINSTANCE instance,
         {
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
+            // TODO(Banni): Temp code. Reload the shader.
+            MainShader = LoadShaderFromFile("../shaders/main.vs.c",
+                                            "../shaders/main.fs.c",
+                                            GlobalScractchArena);
             GameState->GameReloaded = true;
         }
         
         GlfwProcessInput(Renderer.Window, &Input);
-        
+        Input.dt = 1.0f / 75.0f;
         GameCode.GameUpdate(&PlatformApi,
                             &Input,
                             &DefaultScene,
@@ -159,7 +188,8 @@ int CALLBACK WinMain(HINSTANCE instance,
         DrawScene(&Renderer,
                   &DefaultScene,
                   &MainShader,
-                  &ProjectionMat);
+                  &ProjectionMat,
+                  &GlobalModelsList);
         
         glfwSwapBuffers(Renderer.Window);
         glfwPollEvents();

@@ -26,5 +26,6 @@ struct leor_model
     leor_mesh_list Meshes;
     b32 LoadedToGPU;
 };
+Declare_List(leor_model);
 
 #endif //MODEL_H

@@ -209,3 +209,73 @@ void PopItemFront(leor_mesh_list* List)
     List->Length--;
 }
     
+void ResetList(leor_model_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    
+void InitList(memory_arena* arena, leor_model_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (leor_model*)GetMemory(arena,Size * sizeof(leor_model));
+    List->Initialized = true;
+}
+    
+leor_model* InsertItem(leor_model_list* List, leor_model* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    leor_model* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    
+leor_model* GetItemPointer(leor_model_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    leor_model* ptr = List->Items + Index;
+    return ptr;
+}
+    
+leor_model GetItem(leor_model_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    leor_model* ptr = List->Items + Index;
+    return *ptr;
+}
+    
+void DeInitList(leor_model_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    
+void InsertItemFront(leor_model_list* List, leor_model* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    
+void PopItemFront(leor_model_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    
