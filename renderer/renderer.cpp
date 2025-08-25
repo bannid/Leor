@@ -65,6 +65,18 @@ DrawScene(renderer* Renderer,
         for(int32 i = 0; i < Model->Meshes.Length; i++)
         {
             leor_mesh* Mesh = GetItemPointer(&Model->Meshes, i);
+
+            // NOTE(Banni): Attach the texture if any
+            if(*Mesh->DiffuseTexture != '\0')
+            {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, Mesh->DiffuseTextureID);
+                SetUniformBool(Shader->ID, true, "uUseTexture");
+            }
+            else
+            {
+                SetUniformBool(Shader->ID, false, "uUseTexture");
+            }
             glBindVertexArray(Mesh->GPUId);
             glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
         }

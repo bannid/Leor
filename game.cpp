@@ -43,7 +43,7 @@ DLL_API Game_Update(GameUpdate)
     game_state* State = (game_state*)Memory;
     if(!State->Initialized)
     {
-        State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
+        State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
         State->HouseModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
         InitTransform(&Scene->Camera.Transform);
         Scene->Camera.Transform.Position = glm::vec3(0,2, 10);

@@ -39,6 +39,12 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
             Vertex->Normal.y = Mesh->mNormals[i].y;
             Vertex->Normal.z = Mesh->mNormals[i].z;
         }
+        // NOTE(Banni): If this mesh has textures
+        if(Mesh->mTextureCoords[0])
+        {
+            Vertex->TextureCoords.x = Mesh->mTextureCoords[0][i].x; 
+            Vertex->TextureCoords.y = Mesh->mTextureCoords[0][i].y; 
+        }
     }
     
     u32 TotalNumberOfVertices = 0;

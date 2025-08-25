@@ -78,3 +78,9 @@ LoadShaderFromFile(const char* VsFilePath,
     
     return {};
 }
+
+inline void
+SetUniformBool(u32 ShaderProgramID, b32 Value, const char* UniformName)
+{
+    glUniform1i(glGetUniformLocation(ShaderProgramID, UniformName), (int32)Value);
+}
