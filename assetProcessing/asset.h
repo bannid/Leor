@@ -10,8 +10,6 @@
 
 #define LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH 32
 
-// NOTE(Banni): This is how the mesh is stored in the 
-// filesystem
 struct asset_leor_mesh
 {
     u32 NumberOfVertices;
@@ -24,6 +22,9 @@ struct asset_leor_mesh_header_info
 {
     u32 NumberOfVertices;
     u32 Offset;
+    
+    char DiffuseTexture[LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH];
+    char NormalTexture[LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH];
 };
 
 struct asset_leor_model_header

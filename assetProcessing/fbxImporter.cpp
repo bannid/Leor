@@ -56,23 +56,15 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
         {
             aiString AiTexturePath;
             Material->GetTexture(aiTextureType_DIFFUSE, 0, &AiTexturePath);
-            std::string TexturePath = AiTexturePath.C_Str();
-            ASSERT_DEBUG(TexturePath.size() <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
-            for(int32 i = 0; i < TexturePath.length(); i++)
-            {
-                Result.DiffuseTexture[i] = TexturePath.at(i);
-            }
+            ASSERT_DEBUG(AiTexturePath.length <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
+            strcpy(Result.DiffuseTexture, AiTexturePath.C_Str());
         }
         if(Material->GetTextureCount(aiTextureType_NORMALS) >= 1)
         {
             aiString AiTexturePath;
             Material->GetTexture(aiTextureType_DIFFUSE, 0, &AiTexturePath);
-            std::string TexturePath = AiTexturePath.C_Str();
-            ASSERT_DEBUG(TexturePath.size() <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
-            for(int32 i = 0; i < TexturePath.length(); i++)
-            {
-                Result.NormalTexture[i] = TexturePath.at(i);
-            }
+            ASSERT_DEBUG(AiTexturePath.length <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
+            strcpy(Result.NormalTexture, AiTexturePath.C_Str());
         }
         
     }
@@ -132,6 +124,8 @@ WriteModelFile(const char* FileName, const std::vector<asset_leor_mesh>* Meshes)
     {
         asset_leor_mesh_header_info MeshHeader;
         MeshHeader.NumberOfVertices = (*Meshes)[i].NumberOfVertices;
+        strcpy(MeshHeader.DiffuseTexture, (*Meshes)[i].DiffuseTexture);
+        strcpy(MeshHeader.NormalTexture, (*Meshes)[i].NormalTexture);
         MeshHeader.Offset = i * sizeof(leor_vertex) * MeshHeader.NumberOfVertices;
         fwrite(&MeshHeader, sizeof(MeshHeader), 1, FileToWrite);
     }

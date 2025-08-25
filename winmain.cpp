@@ -38,6 +38,7 @@
 // NOTE(Banni): Functions
 #include "glad.c"
 #include "arena.cpp"
+#include "utils.cpp"
 #include "win32/win32_file.cpp"
 #include "win32/win32_memory.cpp"
 #include "win32/win32_dll.cpp"

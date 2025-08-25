@@ -31,6 +31,11 @@ LoadLModel(const char* FilePath,
                 leor_vertex Vertex = Vertices[j];
                 InsertItem(&Mesh.Vertices, &Vertex);
             }
+            if(*MeshHeader->DiffuseTexture != '\0')
+            {
+                Utils_CopyString(MeshHeader->DiffuseTexture, Mesh.DiffuseTexture);
+            }
+            // TODO(Banni): Load the normal texture as well
             InsertItem(&Model->Meshes, &Mesh);
         }
         return true;

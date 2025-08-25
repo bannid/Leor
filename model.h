@@ -3,6 +3,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#define LEOR_MODEL_TEXTURE_MAX_LENGTH 32
+
 struct leor_vertex
 {
     v3 Position;
@@ -16,8 +18,9 @@ struct leor_mesh
 {
     leor_vertex_list Vertices;
     b32 LoadedToGPU;
-    u32 TextureID;
     u32 GPUId;
+    char DiffuseTexture[LEOR_MODEL_TEXTURE_MAX_LENGTH];
+    u32 DiffuseTextureID;
 };
 Declare_List(leor_mesh);
 
