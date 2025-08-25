@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "glad.c"
 
 #include "types.h"
 #include "debug.h"
@@ -17,43 +16,53 @@
 #include "common_layer.h"
 
 #include "arena.h"
-#include "arena.cpp"
 
 #include "win32/win32_memory.h"
 #include "win32/win32_file.h"
-#include "win32/win32_file.cpp"
 #include "win32/win32_memory.h"
-#include "win32/win32_memory.cpp"
 #include "win32/win32_dll.h"
-#include "win32/win32_dll.cpp"
 
 #include "fonts/fonts.h"
-#include "fonts/fonts.cpp"
 
 #include "opengl/framebuffer.h"
-#include "opengl/framebuffer.cpp"
 #include "opengl/model.h"
 #include "opengl/shader.h"
-#include "opengl/shader.cpp"
 #include "opengl/texture.h"
-#include "opengl/texture.cpp"
 
 #include "transform.h"
-#include "transform.cpp"
 #include "model.h"
 #include "scene.h"
 
 #include "renderer/renderer.h"
 
+// NOTE(Banni): Functions
+#include "glad.c"
+#include "arena.cpp"
+#include "win32/win32_file.cpp"
+#include "win32/win32_memory.cpp"
+#include "win32/win32_dll.cpp"
+#include "fonts/fonts.cpp"
+#include "opengl/framebuffer.cpp"
+#include "opengl/shader.cpp"
+#include "opengl/texture.cpp"
+#include "transform.cpp"
 #include "lists_utils.cpp"
 #include "model.cpp"
 #include "opengl/model.cpp"
 #include "renderer/renderer.cpp"
 
 #include "platform_api.h"
-
 #include "game.h"
 
+
+#define WIDTH 1920
+#define HEIGHT 1080
+#define ASPECT_RATIO (f32)WIDTH/(f32)HEIGHT
+
+
+global memory_arena                    GlobalScractchArena;
+global memory_arena                    GlobalModelsMemoryArena;
+global leor_model_list                 GlobalModelsList;
 
 void GlfwCheckState(button_state* ButtonState,
                     button_state LastState,
@@ -101,10 +110,6 @@ void GlfwProcessInput(GLFWwindow* Window, input* Input)
     LastFrameKeyboard = Input->Keyboard;
 }
 
-global memory_arena    GlobalScractchArena;
-global memory_arena    GlobalModelsMemoryArena;
-global leor_model_list GlobalModelsList;
-
 u32 LoadLModelAndUploadToGPU(const char* Path)
 {
     leor_model Model = {};
@@ -116,11 +121,6 @@ u32 LoadLModelAndUploadToGPU(const char* Path)
     InsertItem(&GlobalModelsList, &Model);
     return GlobalModelsList.Length - 1;
 }
-
-const int32 WIDTH = 1920;
-const int32 HEIGHT = 1080;
-
-const f32 ASPECT_RATIO = 1920.0f / 1080.0f;
 
 int CALLBACK WinMain(HINSTANCE instance,
 					 HINSTANCE prevInstance,
@@ -164,6 +164,8 @@ int CALLBACK WinMain(HINSTANCE instance,
     PlatformApi.LoadLModel = &LoadLModelAndUploadToGPU;
     
     f32 DeltaTime = 1.0f / 75.0f;
+    f32 CurrentTime = glfwGetTime();
+    f32 LastTime = CurrentTime;
     //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     while(1)
     {
@@ -180,7 +182,10 @@ int CALLBACK WinMain(HINSTANCE instance,
         }
         
         GlfwProcessInput(Renderer.Window, &Input);
-        Input.dt = 1.0f / 75.0f;
+        CurrentTime = glfwGetTime();
+        Input.dt = CurrentTime - LastTime;
+        LastTime = CurrentTime;
+        
         GameCode.GameUpdate(&PlatformApi,
                             &Input,
                             &DefaultScene,

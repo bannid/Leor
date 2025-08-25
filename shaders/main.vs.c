@@ -15,6 +15,6 @@ void main()
 {
 	gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0f);
     vec4 Normal = uModel * vec4(aNormal, .0f);
-	FragNormal = Normal.xyz;
+	FragNormal = normalize(Normal.xyz);
 	FragUv = aUv;
 }

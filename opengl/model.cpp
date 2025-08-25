@@ -120,6 +120,7 @@ LoadLModelToGPU(leor_model* Model)
         
         Mesh->GPUId = VAO;
         Mesh->LoadedToGPU = true;
+        Mesh->TextureID = LoadTexture("../assets/cottage_diffuse.png", 4, false);
     }
     Model->LoadedToGPU = true;
 }

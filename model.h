@@ -11,12 +11,12 @@ struct leor_vertex
 };
 Declare_List(leor_vertex);
 
+// NOTE(Banni): Vertices are stored in order in memory
 struct leor_mesh
 {
-    // TODO(Banni): We will just put these vertices in order maybe?
-    // Or should we use EBO?
     leor_vertex_list Vertices;
     b32 LoadedToGPU;
+    u32 TextureID;
     u32 GPUId;
 };
 Declare_List(leor_mesh);

@@ -3,20 +3,21 @@
 #ifndef ASSET_H
 #define ASSET_H
 
-#if !defined(LEOR)
-
 #include "../debug.h"
 #include "../utils.h"
 #include "../types.h"
 #include "../model.h"
 
-#endif
+#define LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH 32
+
 // NOTE(Banni): This is how the mesh is stored in the 
 // filesystem
 struct asset_leor_mesh
 {
     u32 NumberOfVertices;
     leor_vertex* Vertices;
+    char DiffuseTexture[LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH];
+    char NormalTexture[LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH];
 };
 
 struct asset_leor_mesh_header_info

@@ -11,6 +11,7 @@ struct game_state
     b32                                                 GameReloaded;
     memory_arena                                        Arena;
     u32                                                 CubeModel;
+    u32                                                 HouseModel;
     transform                                           Camera;
     
     entity*                                             Player;

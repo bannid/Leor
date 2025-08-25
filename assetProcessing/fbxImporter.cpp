@@ -25,6 +25,7 @@ void WriteMeshFile(const char* FileName,
 
 asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
 {
+    asset_leor_mesh Result = {};
     leor_vertex* Vertices = (leor_vertex*)malloc(sizeof(leor_vertex) * Mesh->mNumVertices);   
     for(int32 i = 0; i < Mesh->mNumVertices; i++)
     {
@@ -47,6 +48,35 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
         TotalNumberOfVertices += Mesh->mFaces[i].mNumIndices;
     }
     
+    // NOTE(Banni): Textures
+    if(Mesh->mMaterialIndex >= 0)
+    {
+        aiMaterial* Material = Scene->mMaterials[Mesh->mMaterialIndex];
+        if(Material->GetTextureCount(aiTextureType_DIFFUSE) >= 1)
+        {
+            aiString AiTexturePath;
+            Material->GetTexture(aiTextureType_DIFFUSE, 0, &AiTexturePath);
+            std::string TexturePath = AiTexturePath.C_Str();
+            ASSERT_DEBUG(TexturePath.size() <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
+            for(int32 i = 0; i < TexturePath.length(); i++)
+            {
+                Result.DiffuseTexture[i] = TexturePath.at(i);
+            }
+        }
+        if(Material->GetTextureCount(aiTextureType_NORMALS) >= 1)
+        {
+            aiString AiTexturePath;
+            Material->GetTexture(aiTextureType_DIFFUSE, 0, &AiTexturePath);
+            std::string TexturePath = AiTexturePath.C_Str();
+            ASSERT_DEBUG(TexturePath.size() <= LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH);
+            for(int32 i = 0; i < TexturePath.length(); i++)
+            {
+                Result.NormalTexture[i] = TexturePath.at(i);
+            }
+        }
+        
+    }
+    // NOTE(Banni): End textures
     leor_vertex* Faces = (leor_vertex*)malloc(sizeof(leor_vertex) * TotalNumberOfVertices);
     
     for(int32 i = 0; i < Mesh->mNumFaces; i++)
@@ -61,11 +91,9 @@ asset_leor_mesh ProcessMesh(aiMesh* Mesh, const aiScene* Scene)
     }
     
     free(Vertices);
-    return
-    {
-        TotalNumberOfVertices,
-        Faces
-    };
+    Result.NumberOfVertices = TotalNumberOfVertices;
+    Result.Vertices = Faces;
+    return Result;
 }
 
 void ProcessNode(aiNode* Node,
@@ -196,7 +224,7 @@ TestTheWrittenFile(const char* FileName)
 
 int main(int argc, char* argv[])
 {
-    std::string BasePath = "../assets/";
+    std::string BasePath = "../assets/models/";
     if(argc != 2)
     {
         std::cout << "[USAGE]: fbxImporter.exe {FileName}";
@@ -205,7 +233,7 @@ int main(int argc, char* argv[])
     std::string FileName = argv[1];
     std::string FullPath = BasePath + FileName;
     const char* Path = FullPath.c_str();
-    std::cout << "Processing file at: " << Path;
+    std::cout << "Processing file at: " << Path << std::endl;
     Assimp::Importer Importer;
     const aiScene* Scene = Importer.ReadFile(Path,
                                              aiProcess_Triangulate |

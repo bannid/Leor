@@ -17,7 +17,7 @@ InitializeEntities(game_state* State,
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
     Player.ModelIndex = State->CubeModel;
-    Player.Transform.Scale = v3(.58 / 2., 2./2., .2 / 2.);
+    Player.Transform.Scale = v3(.58 / 2., 2./2., .2 / 2);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
     entity Ground;
@@ -30,9 +30,9 @@ InitializeEntities(game_state* State,
     
     entity House;
     InitTransform(&House.Transform);
-    House.Transform.Position = v3(-15,4.5,-20);
-    House.Transform.Scale = v3(10, 4.5, 10);
-    House.ModelIndex = State->CubeModel;
+    House.Transform.Scale = v3(5, 2.25, 5);
+    House.Transform.Position = v3(-10, 2.25, -10);
+    House.ModelIndex = State->HouseModel;
     InsertItem(&Scene->Entites, &House);
     
     
@@ -43,7 +43,8 @@ DLL_API Game_Update(GameUpdate)
     game_state* State = (game_state*)Memory;
     if(!State->Initialized)
     {
-        State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cube.lmodel");
+        State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
+        State->HouseModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
         InitTransform(&Scene->Camera.Transform);
         Scene->Camera.Transform.Position = glm::vec3(0,2, 10);
         Scene->Camera.Transform.Rotation = glm::quatLookAt(v3(0,0,-1), v3(0,1,0));
