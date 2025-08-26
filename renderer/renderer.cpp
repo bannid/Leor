@@ -42,7 +42,7 @@ DrawScene(renderer* Renderer,
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glm::mat4 ViewMat = glm::inverse(TransformToMat4(&Scene->Camera.Transform));
+    glm::mat4 ViewMat = GetViewMatrix(&Scene->ThirdPersonCamera);
     glUseProgram(Shader->ID);
     glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
                        1,

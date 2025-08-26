@@ -2,6 +2,7 @@
 
 in vec3 FragNormal;
 in vec2 FragUv;
+in vec3 FragWorld;
 
 out vec4 FragColour;
 
@@ -11,7 +12,11 @@ void main()
 {
     vec3 LightDir = normalize(vec3(1,1,-1));
     float Diffuse = clamp(.2, 1., dot(LightDir, FragNormal));
-	FragColour = vec4(vec3(Diffuse), 1.0f);
+    float Multiplier = 1.0f;
+    if(FragWorld.y < .0)
+        Multiplier = sin(FragWorld.x) * sin(FragWorld.z);
+    vec3 Colour = vec3(Diffuse) * pow(Multiplier, .1f);
+	FragColour = vec4(Colour, 1.0f);
     if(uUseTexture)
     {
         vec3 TextureColour = texture(uDiffuseTexture, FragUv * 4.0f).xyz;

@@ -31,6 +31,7 @@
 
 #include "transform.h"
 #include "model.h"
+#include "camera.h"
 #include "scene.h"
 
 #include "renderer/renderer.h"
@@ -49,6 +50,7 @@
 #include "transform.cpp"
 #include "lists_utils.cpp"
 #include "model.cpp"
+#include "camera.cpp"
 #include "opengl/model.cpp"
 #include "renderer/renderer.cpp"
 
@@ -148,6 +150,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     InitList(&MainMemoryArena, &GlobalModelsList, 100);
     
     scene DefaultScene = {};
+    InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 10.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
     
     GlobalModelsMemoryArena = GetMemoryArena(&MainMemoryArena,

@@ -61,23 +61,31 @@ DLL_API Game_Update(GameUpdate)
         State->GameReloaded = false;
     }
     
+    // NOTE(Banni): Rudimentary character controller
     f32 SpeedPerSecond = 2.4;
-    
+    f32 RotationSpeedDeg = 360.0f;
+    f32 MoveSpeed = 10.0f;
     if(Input->Keyboard.Up.IsDown)
     {
-        State->Player->Transform.Position.z -= SpeedPerSecond * Input->dt;
+        glm::vec3 Forward = glm::vec3(0,0,-1);
+        Forward = State->Player->Transform.Rotation * Forward;
+        State->Player->Transform.Position += Forward * MoveSpeed * Input->dt;
     }
     if(Input->Keyboard.Down.IsDown)
     {
-        State->Player->Transform.Position.z += SpeedPerSecond * Input->dt;
+        glm::vec3 Forward = glm::vec3(0,0,-1);
+        Forward = State->Player->Transform.Rotation * Forward;
+        State->Player->Transform.Position -= Forward * MoveSpeed * Input->dt;
     }
     if(Input->Keyboard.Right.IsDown)
     {
-        State->Player->Transform.Position.x += SpeedPerSecond * Input->dt;
+        glm::quat Q = glm::angleAxis(glm::radians(-RotationSpeedDeg) * Input->dt, glm::vec3(0,1,0));
+        State->Player->Transform.Rotation *= Q;
     }
     if(Input->Keyboard.Left.IsDown)
     {
-        State->Player->Transform.Position.x -= SpeedPerSecond * Input->dt;
+        glm::quat Q = glm::angleAxis(glm::radians(RotationSpeedDeg) * Input->dt, glm::vec3(0,1,0));
+        State->Player->Transform.Rotation *= Q;
     }
-    
+    Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;   
 }

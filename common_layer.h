@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "transform.h"
 #include "model.h"
+#include "camera.h"
 #include "scene.h"
 #include "arena.h"
 #include "platform_api.h"

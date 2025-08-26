@@ -6,6 +6,7 @@ layout (location = 2) in vec2 aUv;
 
 out vec3 FragNormal;
 out vec2 FragUv;
+out vec3 FragWorld;
 
 uniform mat4 uProjection;
 uniform mat4 uView;
@@ -16,5 +17,6 @@ void main()
 	gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0f);
     vec4 Normal = uModel * vec4(aNormal, .0f);
 	FragNormal = normalize(Normal.xyz);
+    FragWorld = (uModel * vec4(aPos, 1.0f)).xyz;
 	FragUv = aUv;
 }

@@ -25,6 +25,7 @@ struct entity_list
 struct scene
 {
     camera Camera;
+    third_person_camera ThirdPersonCamera;
     entity_list Entites;
 };
 
