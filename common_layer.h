@@ -10,6 +10,8 @@
 #include "types.h"
 #include "debug.h"
 #include "utils.h"
+#include "physics/collision/primitives.h"
+#include "physics/physics.h"
 #include "transform.h"
 #include "model.h"
 #include "camera.h"

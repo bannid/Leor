@@ -2,14 +2,14 @@ void InitializeThirdPersonCamera(third_person_camera* Camera, f32 Distance)
 {
     Camera->Distance = Distance;
     Camera->Yaw = .0f;
-    Camera->Pitch = glm::radians(-20.0f);
+    Camera->Pitch = -30.0f;
     Camera->MinPitchDegrees = 70.0f;
     Camera->MaxPitchDegrees = -70.0f;
 }
 glm::quat GetOrientation(third_person_camera* Camera)
 {
-    glm::quat Yaw = glm::angleAxis(Camera->Yaw, glm::vec3(0,1,0));
-    glm::quat Pitch = glm::angleAxis(Camera->Pitch, glm::vec3(1,0,0));
+    glm::quat Yaw = glm::angleAxis(glm::radians(Camera->Yaw), glm::vec3(0,1,0));
+    glm::quat Pitch = glm::angleAxis(glm::radians(Camera->Pitch), glm::vec3(1,0,0));
     return Yaw * Pitch;
 }
 

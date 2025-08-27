@@ -1,4 +1,5 @@
-gl_model QuadModelBottomLeftAligned()
+gl_model
+QuadModelBottomLeftAligned()
 {
     
     f32 z = 0.0f;
@@ -32,7 +33,8 @@ gl_model QuadModelBottomLeftAligned()
     return Model;
 }
 
-gl_model QuadModelCenterAligned()
+gl_model
+QuadModelCenterAligned()
 {
     f32 z = 0.0f;
     f32 e = .5f;
@@ -68,7 +70,8 @@ gl_model QuadModelCenterAligned()
     return Model;
 }
 
-gl_model LoadQuadModel(b32 CenterAligned)
+gl_model
+LoadQuadModel(b32 CenterAligned)
 {
     if(CenterAligned) return QuadModelCenterAligned();
     return QuadModelBottomLeftAligned();
@@ -130,7 +133,8 @@ LoadLModelToGPU(leor_model* Model)
     Model->LoadedToGPU = true;
 }
 
-gl_model LoadCubeToGPU()
+gl_model
+LoadCubeToGPU()
 {
     f32 vertices[] = {
 		// back face
@@ -202,4 +206,26 @@ gl_model LoadCubeToGPU()
 	Cube.VertCount = 36;
     
 	return Cube;
+}
+
+gl_model
+LoadCollisionMeshToGPU(leor_primitive_triangle_list Triangles)
+{
+    u32 VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(leor_primitive_triangle) * Triangles.Length, (f32*)Triangles.Items, GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+    gl_model Result;
+    Result.VaoID = VAO;
+    Result.VboID = VBO;
+    Result.VertCount = Triangles.Length * 3;
+    return Result;
 }

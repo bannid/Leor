@@ -28,8 +28,12 @@
 #include "opengl/model.h"
 #include "opengl/shader.h"
 #include "opengl/texture.h"
-
 #include "transform.h"
+
+#include "physics/collision/primitives.h"
+#include "physics/physics.h"
+
+
 #include "model.h"
 #include "camera.h"
 #include "scene.h"
@@ -49,6 +53,7 @@
 #include "opengl/texture.cpp"
 #include "transform.cpp"
 #include "lists_utils.cpp"
+#include "lists_utils_internal.cpp"
 #include "model.cpp"
 #include "camera.cpp"
 #include "opengl/model.cpp"
@@ -62,10 +67,10 @@
 #define HEIGHT 1080
 #define ASPECT_RATIO (f32)WIDTH/(f32)HEIGHT
 
-
-global memory_arena                    GlobalScractchArena;
-global memory_arena                    GlobalModelsMemoryArena;
-global leor_model_list                 GlobalModelsList;
+// NOTE(Banni): Globals
+global memory_arena                                 GlobalScractchArena;
+global memory_arena                                 GlobalModelsMemoryArena;
+global leor_model_list                              GlobalModelsList;
 
 void GlfwCheckState(button_state* ButtonState,
                     button_state LastState,
@@ -113,7 +118,8 @@ void GlfwProcessInput(GLFWwindow* Window, input* Input)
     LastFrameKeyboard = Input->Keyboard;
 }
 
-u32 LoadLModelAndUploadToGPU(const char* Path)
+// NOTE(Banni): Platform API implementation
+Load_L_Model(LoadLModelAndUploadToGPU)
 {
     leor_model Model = {};
     LoadLModel(Path,
@@ -123,6 +129,48 @@ u32 LoadLModelAndUploadToGPU(const char* Path)
     LoadLModelToGPU(&Model);
     InsertItem(&GlobalModelsList, &Model);
     return GlobalModelsList.Length - 1;
+}
+
+// NOTE(Banni): Platform API implementation
+// TODO(Banni): Right now we dont have any way of distinguising b/w static and moving entities.
+Set_Collision_Mesh(SetCollisionMesh)
+{
+    ResetList(&World->CollisionMesh);
+    for(int32 i = 0; i < EntityList.Length; i++)
+    {
+        entity* Entity = GetItemPointer(&EntityList, i);
+        mat4 EntityTransform = TransformToMat4(&Entity->Transform);
+        leor_model* Model = GetItemPointer(&GlobalModelsList, Entity->ModelIndex);
+        for(int32 j = 0; j < Model->Meshes.Length; j++)
+        {
+            leor_mesh* Mesh = GetItemPointer(&Model->Meshes, j);
+            for(int32 k = 0; k < Mesh->Vertices.Length; k+=3)
+            {
+                leor_primitive_triangle Triangle;
+                v4 PositionOne = v4(GetItemPointer(&Mesh->Vertices, k)->Position, 1.0f);
+                v4 PositionTwo =  v4(GetItemPointer(&Mesh->Vertices, k + 1)->Position, 1.0f);
+                v4 PositionThree = v4(GetItemPointer(&Mesh->Vertices, k + 2)->Position, 1.0f);
+                
+                // NOTE(Banni): Bring the vertices to world space
+                PositionOne = EntityTransform * PositionOne;
+                PositionTwo = EntityTransform * PositionTwo;
+                PositionThree = EntityTransform * PositionThree;
+                
+                Triangle.V1 = v3(PositionOne.x, PositionOne.y, PositionOne.z);
+                Triangle.V2 = v3(PositionTwo.x, PositionTwo.y, PositionTwo.z);
+                Triangle.V3 = v3(PositionThree.x, PositionThree.y, PositionThree.z);
+                InsertItem(&World->CollisionMesh, &Triangle);
+            }
+        }
+    }
+    World->GPUHandle = LoadCollisionMeshToGPU(World->CollisionMesh).VaoID;
+}
+
+inline void
+InitiateGlobals(memory_arena* Arena)
+{
+    GlobalModelsList = {};
+    InitList(Arena, &GlobalModelsList, 100);
 }
 
 int CALLBACK WinMain(HINSTANCE instance,
@@ -146,12 +194,14 @@ int CALLBACK WinMain(HINSTANCE instance,
     ZeroMemory(GameState, sizeof(game_state));
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
     
-    GlobalModelsList = {};
-    InitList(&MainMemoryArena, &GlobalModelsList, 100);
+    // NOTE(Banni): Initiate globals
+    InitiateGlobals(&MainMemoryArena);
     
+    // NOTE(Banni): Initiate the default scene
     scene DefaultScene = {};
-    InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 10.0f);
+    InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
+    
     
     GlobalModelsMemoryArena = GetMemoryArena(&MainMemoryArena,
                                              MEGABYTE(10));
@@ -163,14 +213,18 @@ int CALLBACK WinMain(HINSTANCE instance,
     shader_program MainShader = LoadShaderFromFile("../shaders/main.vs.c",
                                                    "../shaders/main.fs.c",
                                                    GlobalScractchArena);
+    shader_program CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
+                                                            "../shaders/collision_mesh.fs.c",
+                                                            GlobalScractchArena);
     
     platform_api PlatformApi;
     PlatformApi.LoadLModel = &LoadLModelAndUploadToGPU;
+    PlatformApi.SetCollisionMesh = &SetCollisionMesh;
     
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
     f32 LastTime = CurrentTime;
-    //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    
     while(1)
     {
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
@@ -194,11 +248,25 @@ int CALLBACK WinMain(HINSTANCE instance,
                             &Input,
                             &DefaultScene,
                             (void*)GameState);
+        
+        // NOTE(Banni): Draw the actual scene
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         DrawScene(&Renderer,
                   &DefaultScene,
                   &MainShader,
                   &ProjectionMat,
                   &GlobalModelsList);
+        
+        
+        // NOTE(Banni): Draw the collision meshs
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
+        DrawCollisionMesh(&Renderer,
+                          &CollisionMeshShader,
+                          &GameState->World,
+                          &CollisionViewMat,
+                          &ProjectionMat
+                          );
         
         glfwSwapBuffers(Renderer.Window);
         glfwPollEvents();

@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 function ImplementInitFunction(typeName) {
     const functionDefinition = `
 void InitList(memory_arena* arena, ${typeName}_list* List, u32 Size)
@@ -104,24 +106,36 @@ ${typeName} GetItem(${typeName}_list* List,u32 Index)
     return functionDefinition + functionDefinition2;
 }
 
-function something() {
-    const lists = [
+function GenerateSource(list)
+{
+    let source = '// Generated code';
+    list.forEach((l) => {
+        source += ImplementResetListFunction(l);
+        source += ImplementInitFunction(l);
+        source += ImplementInsertItemFunction(l);
+        source += ImplementGetItemFunction(l);
+        source += ImplementDeinitFunction(l);
+        source += ImplementPushItemAtFrontFunction(l);
+        source += ImplementPopItemFront(l);
+    });
+    return source;
+}
+
+function WriteLists() {
+    const internalLists = [
+        
+    ];
+    const sharedLists = [
         'entity',
         'leor_vertex',
         'leor_mesh',
-        'leor_model'
+        'leor_model',
+        'leor_primitive_triangle'
     ];
-    let string = '// Generated code';
-    lists.forEach((l) => {
-        string += ImplementResetListFunction(l);
-        string += ImplementInitFunction(l);
-        string += ImplementInsertItemFunction(l);
-        string += ImplementGetItemFunction(l);
-        string += ImplementDeinitFunction(l);
-        string += ImplementPushItemAtFrontFunction(l);
-        string += ImplementPopItemFront(l);
-    });
-    return string;
-}
+    let sharedListsSource = GenerateSource(sharedLists);
+    let internalListsSource = GenerateSource(internalLists);
 
-console.log(something());
+    fs.writeFileSync('lists_utils_internal.cpp', internalListsSource);
+    fs.writeFileSync('lists_utils.cpp', sharedListsSource);
+}
+WriteLists();

@@ -12,8 +12,9 @@ struct game_state
     memory_arena                                        Arena;
     u32                                                 CubeModel;
     u32                                                 HouseModel;
-    transform                                           Camera;
     
+    // NOTE(Banni): Simulation
+    leor_physics_world                                  World;
     entity*                                             Player;
 };
 

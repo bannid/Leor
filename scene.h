@@ -3,11 +3,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-struct camera
-{
-    transform Transform;
-};
-
 struct entity
 {
     transform Transform;
@@ -24,7 +19,6 @@ struct entity_list
 
 struct scene
 {
-    camera Camera;
     third_person_camera ThirdPersonCamera;
     entity_list Entites;
 };

@@ -3,8 +3,8 @@
 #include "arena.cpp"
 #include "lists_utils.cpp"
 #include "transform.cpp"
+#include "physics/physics.cpp"
 
-#define ASPECT_RATIO (16.0f / 9.0f)
 
 #define PLAYER_START_POSITION v3(0,1,0)
 
@@ -45,47 +45,49 @@ DLL_API Game_Update(GameUpdate)
     {
         State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
         State->HouseModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
-        InitTransform(&Scene->Camera.Transform);
-        Scene->Camera.Transform.Position = glm::vec3(0,2, 10);
-        Scene->Camera.Transform.Rotation = glm::quatLookAt(v3(0,0,-1), v3(0,1,0));
         
+        // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Scene);
+        
+        // NOTE(Banni): Initialize the static mesh and stuff
+        InitList(&State->Arena, &State->World.CollisionMesh, 10000);
+        State->World.Player.Position = PLAYER_START_POSITION;
+        State->World.Player.Velocity = v3(0);
+        PlatformApi->SetCollisionMesh(Scene->Entites, &State->World);
+        
         
         State->Initialized = true;
     }
     if(State->GameReloaded)
     {
         InitializeEntities(State, Scene);
-        Scene->Camera.Transform.Position = glm::vec3(0,5, 20);
-        Scene->Camera.Transform.Rotation = glm::quatLookAt(v3(0,0,-1), v3(0,1,0));
         State->GameReloaded = false;
     }
     
     // NOTE(Banni): Rudimentary character controller
     f32 SpeedPerSecond = 2.4;
-    f32 RotationSpeedDeg = 360.0f;
+    f32 RotationSpeedDeg = 180.0f;
     f32 MoveSpeed = 10.0f;
+    third_person_camera* Camera = &Scene->ThirdPersonCamera;
+    f32 Speed = .2f;
     if(Input->Keyboard.Up.IsDown)
     {
-        glm::vec3 Forward = glm::vec3(0,0,-1);
-        Forward = State->Player->Transform.Rotation * Forward;
-        State->Player->Transform.Position += Forward * MoveSpeed * Input->dt;
+        State->World.Player.Velocity += v3(0,0,-Speed);
     }
     if(Input->Keyboard.Down.IsDown)
     {
-        glm::vec3 Forward = glm::vec3(0,0,-1);
-        Forward = State->Player->Transform.Rotation * Forward;
-        State->Player->Transform.Position -= Forward * MoveSpeed * Input->dt;
+        State->World.Player.Velocity += v3(0,0,Speed);
     }
     if(Input->Keyboard.Right.IsDown)
     {
-        glm::quat Q = glm::angleAxis(glm::radians(-RotationSpeedDeg) * Input->dt, glm::vec3(0,1,0));
-        State->Player->Transform.Rotation *= Q;
+        State->World.Player.YawDegrees -= 50.0f * Input->dt;
     }
     if(Input->Keyboard.Left.IsDown)
     {
-        glm::quat Q = glm::angleAxis(glm::radians(RotationSpeedDeg) * Input->dt, glm::vec3(0,1,0));
-        State->Player->Transform.Rotation *= Q;
+        State->World.Player.YawDegrees += 50.0f * Input->dt;
     }
-    Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;   
+    State->Player->Transform.Position = State->World.Player.Position;
+    Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
+    Scene->ThirdPersonCamera.Yaw = State->World.Player.YawDegrees;
+    UpdateWorld(&State->World, Input->dt);
 }

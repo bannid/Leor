@@ -15,7 +15,6 @@ InitializeRenderer(renderer* Renderer,
                                        NULL);
     if(Renderer->Window == NULL) return false;
     glfwMakeContextCurrent(Renderer->Window);
-    glfwSwapInterval(1);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return -1;
     
     // NOTE(Banni): GL Flags
@@ -65,7 +64,7 @@ DrawScene(renderer* Renderer,
         for(int32 i = 0; i < Model->Meshes.Length; i++)
         {
             leor_mesh* Mesh = GetItemPointer(&Model->Meshes, i);
-
+            
             // NOTE(Banni): Attach the texture if any
             if(*Mesh->DiffuseTexture != '\0')
             {
@@ -80,6 +79,25 @@ DrawScene(renderer* Renderer,
             glBindVertexArray(Mesh->GPUId);
             glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
         }
-    }
-    
+    }   
+}
+
+void
+DrawCollisionMesh(renderer*           Renderer,
+                  shader_program*     Shader,
+                  leor_physics_world* World,
+                  glm::mat4*          ViewMat,
+                  glm::mat4*          Projection)
+{
+    glUseProgram(Shader->ID);
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(*Projection));
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uView"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(*ViewMat));
+    glBindVertexArray(World->GPUHandle);
+    glDrawArrays(GL_TRIANGLES, 0, World->CollisionMesh.Length * 3);
 }
