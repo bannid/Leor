@@ -87,6 +87,11 @@ DLL_API Game_Update(GameUpdate)
         State->World.Player.YawDegrees += 50.0f * Input->dt;
     }
     State->Player->Transform.Position = State->World.Player.Position;
+    
+    glm::quat YawQ = glm::angleAxis(glm::radians(State->World.Player.YawDegrees),
+                                    glm::vec3(0,1,0));
+    State->Player->Transform.Rotation = YawQ;
+    
     Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
     Scene->ThirdPersonCamera.Yaw = State->World.Player.YawDegrees;
     UpdateWorld(&State->World, Input->dt);

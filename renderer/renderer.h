@@ -3,7 +3,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-// TODO(Banni): NOT USED YET.
+
 struct renderer
 {
     GLFWwindow* Window;

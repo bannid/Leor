@@ -31,6 +31,7 @@
 #include "transform.h"
 
 #include "physics/collision/primitives.h"
+#include "physics/collision/collision.h"
 #include "physics/physics.h"
 
 
