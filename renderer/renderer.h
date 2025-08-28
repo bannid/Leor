@@ -7,7 +7,9 @@
 #include "opengl/model.h"
 #include "opengl/shader.h"
 #include "opengl/texture.h"
-#include "transform.h"
+#include "model.h"
+#include "scene.h"
+#include "camera.h"
 
 struct renderer
 {

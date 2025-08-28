@@ -6,7 +6,7 @@
 #include "../debug.h"
 #include "../utils.h"
 #include "../types.h"
-#include "../model.h"
+#include "../renderer/model.h"
 
 #define LEOR_ASSET_TEXTURE_NAME_MAX_LENGTH 32
 

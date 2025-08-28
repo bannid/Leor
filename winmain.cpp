@@ -13,6 +13,8 @@
 #include "debug.h"
 #include "utils.h"
 
+#include "transform.h"
+
 #include "common_layer.h"
 
 #include "arena.h"
@@ -23,14 +25,10 @@
 
 #include "physics/physics.h"
 
-
-#include "model.h"
-#include "camera.h"
-#include "scene.h"
-
 #include "renderer/renderer.h"
 
 // NOTE(Banni): Functions
+#include "transform.cpp"
 #include "win32/win32_file.cpp"
 #include "win32/win32_memory.cpp"
 #include "win32/win32_dll.cpp"
@@ -46,9 +44,8 @@
 #include "renderer/opengl/shader.cpp"
 #include "renderer/opengl/texture.cpp"
 #include "renderer/opengl/model.cpp"
-#include "transform.cpp"
-#include "model.cpp"
-#include "camera.cpp"
+#include "renderer/model.cpp"
+#include "renderer/camera.cpp"
 
 #include "renderer/renderer.cpp"
 

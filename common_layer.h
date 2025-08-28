@@ -1,5 +1,13 @@
 /* date = July 30th 2025 8:06 pm */
 
+/** This file provides a layer b/w game side and the engine side. The includes below are required in the game side.
+ * We also need to include this file in the engine side as we need some definitions from this file. Mainly the update
+ * callback into the game DLL.
+ * 
+ * Including this file in engine side wouldn't conflict with the already included headers as the HEADER GUARD would stop the
+ * double include.
+ */
+
 #ifndef COMMON_LAYER_H
 #define COMMON_LAYER_H
 
@@ -13,20 +21,13 @@
 #include "physics/collision/primitives.h"
 #include "physics/physics.h"
 #include "transform.h"
-#include "model.h"
-#include "camera.h"
-#include "scene.h"
+#include "renderer/model.h"
+#include "renderer/camera.h"
+#include "renderer/scene.h"
 #include "arena.h"
 #include "engine_api.h"
 
 #define DLL_API extern "C" __declspec(dllexport)
-
-struct window
-{
-    u32                                              Width;
-    u32                                              Height;
-    b32                                              Resized;
-};
 
 struct button_state
 {
