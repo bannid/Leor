@@ -1,4 +1,4 @@
-font_type FreeTypeLoadFontsFromMemory(u8* Data, u32 Size, f32 PixelHeight)
+font_type OpenGL_FreeTypeLoadFontsFromMemoryToGPU(u8* Data, u32 Size, f32 PixelHeight)
 {
     font_type Font = {};
     
@@ -76,7 +76,7 @@ FreeTypeLoadFontsFromFile(const char* FilePath,
     int32 BytesRead = Win32ReadEntireFileV2(FilePath, Buffer, MEGABYTE(1));
     if (BytesRead)
     {
-        return FreeTypeLoadFontsFromMemory(Buffer, BytesRead, PixelHeight);
+        return OpenGL_FreeTypeLoadFontsFromMemoryToGPU(Buffer, BytesRead, PixelHeight);
     }
     ASSERT_DEBUG(0);
     return {};
