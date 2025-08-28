@@ -3,6 +3,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include "opengl/fonts/fonts.h"
 #include "opengl/framebuffer.h"
 #include "opengl/model.h"
 #include "opengl/shader.h"

@@ -21,8 +21,6 @@
 
 #include "win32/win32.h"
 
-#include "fonts/fonts.h"
-
 #include "physics/physics.h"
 
 #include "renderer/renderer.h"
@@ -39,7 +37,7 @@
 
 #include "utils.cpp"
 
-#include "fonts/fonts.cpp"
+#include "renderer/opengl/fonts/fonts.cpp"
 #include "renderer/opengl/framebuffer.cpp"
 #include "renderer/opengl/shader.cpp"
 #include "renderer/opengl/texture.cpp"
@@ -199,7 +197,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f), 
                                                ASPECT_RATIO,
                                                .1f,
-                                               100.0f);
+                                               500.0f);
     shader_program MainShader = LoadShaderFromFile("../shaders/main.vs.c",
                                                    "../shaders/main.fs.c",
                                                    GlobalScractchArena);
@@ -248,7 +246,7 @@ int CALLBACK WinMain(HINSTANCE instance,
                   &GlobalModelsList);
         
         
-        // NOTE(Banni): Draw the collision meshs
+        // NOTE(Banni): Draw the collision mesh
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
         DrawCollisionMesh(&Renderer,
