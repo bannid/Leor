@@ -3,6 +3,11 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include "opengl/framebuffer.h"
+#include "opengl/model.h"
+#include "opengl/shader.h"
+#include "opengl/texture.h"
+#include "transform.h"
 
 struct renderer
 {

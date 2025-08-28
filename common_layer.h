@@ -17,7 +17,7 @@
 #include "camera.h"
 #include "scene.h"
 #include "arena.h"
-#include "platform_api.h"
+#include "engine_api.h"
 
 #define DLL_API extern "C" __declspec(dllexport)
 
@@ -59,7 +59,7 @@ struct input
     keyboard_input                                   Keyboard;
 };
 
-#define Game_Update(Name) void Name(platform_api* PlatformApi,\
+#define Game_Update(Name) void Name(engine_api* Api,\
 input* Input,\
 scene* Scene,\
 void* Memory)

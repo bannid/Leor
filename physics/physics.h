@@ -3,6 +3,9 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include "physics/collision/primitives.h"
+#include "physics/collision/collision.h"
+
 struct leor_physics_player
 {
     v3 Position;

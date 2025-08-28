@@ -1,7 +1,7 @@
 /* date = August 2nd 2025 2:26 pm */
 
-#ifndef PLATFORM_API_H
-#define PLATFORM_API_H
+#ifndef ENGINE_API_H
+#define ENGINE_API_H
 
 // NOTE(Banni): Loads a processed model to the engine.
 #define Load_L_Model(Name) u32 Name(const char* Path)
@@ -16,11 +16,11 @@ typedef Set_Collision_Mesh(set_collision_mesh);
 #define Exit_Game(Name) void Name()
 typedef Exit_Game(exit_game);
 
-struct platform_api
+struct engine_api
 {
     load_l_model*                          LoadLModel;
     set_collision_mesh*                    SetCollisionMesh;
     exit_game*                             ExitGame;
 };
 
-#endif //PLATFORM_API_H
+#endif //ENGINE_API_H

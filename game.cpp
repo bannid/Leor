@@ -43,8 +43,8 @@ DLL_API Game_Update(GameUpdate)
     game_state* State = (game_state*)Memory;
     if(!State->Initialized)
     {
-        State->CubeModel = PlatformApi->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
-        State->HouseModel = PlatformApi->LoadLModel("../assetsProcessed/cube.obj.lmodel");
+        State->CubeModel = Api->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
+        State->HouseModel = Api->LoadLModel("../assetsProcessed/cube.obj.lmodel");
         
         // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Scene);
@@ -53,7 +53,7 @@ DLL_API Game_Update(GameUpdate)
         InitList(&State->Arena, &State->World.CollisionMesh, 10000);
         State->World.Player.Position = PLAYER_START_POSITION;
         State->World.Player.Velocity = v3(0);
-        PlatformApi->SetCollisionMesh(Scene->Entites, &State->World);
+        Api->SetCollisionMesh(Scene->Entites, &State->World);
         
         
         State->Initialized = true;

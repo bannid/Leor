@@ -17,21 +17,10 @@
 
 #include "arena.h"
 
-#include "win32/win32_memory.h"
-#include "win32/win32_file.h"
-#include "win32/win32_memory.h"
-#include "win32/win32_dll.h"
+#include "win32/win32.h"
 
 #include "fonts/fonts.h"
 
-#include "opengl/framebuffer.h"
-#include "opengl/model.h"
-#include "opengl/shader.h"
-#include "opengl/texture.h"
-#include "transform.h"
-
-#include "physics/collision/primitives.h"
-#include "physics/collision/collision.h"
 #include "physics/physics.h"
 
 
@@ -42,25 +31,28 @@
 #include "renderer/renderer.h"
 
 // NOTE(Banni): Functions
-#include "glad.c"
-#include "arena.cpp"
-#include "utils.cpp"
 #include "win32/win32_file.cpp"
 #include "win32/win32_memory.cpp"
 #include "win32/win32_dll.cpp"
-#include "fonts/fonts.cpp"
-#include "opengl/framebuffer.cpp"
-#include "opengl/shader.cpp"
-#include "opengl/texture.cpp"
-#include "transform.cpp"
+#include "arena.cpp"
 #include "lists_utils.cpp"
 #include "lists_utils_internal.cpp"
+#include "glad.c"
+
+#include "utils.cpp"
+
+#include "fonts/fonts.cpp"
+#include "renderer/opengl/framebuffer.cpp"
+#include "renderer/opengl/shader.cpp"
+#include "renderer/opengl/texture.cpp"
+#include "renderer/opengl/model.cpp"
+#include "transform.cpp"
 #include "model.cpp"
 #include "camera.cpp"
-#include "opengl/model.cpp"
+
 #include "renderer/renderer.cpp"
 
-#include "platform_api.h"
+#include "engine_api.h"
 #include "game.h"
 
 
@@ -218,9 +210,9 @@ int CALLBACK WinMain(HINSTANCE instance,
                                                             "../shaders/collision_mesh.fs.c",
                                                             GlobalScractchArena);
     
-    platform_api PlatformApi;
-    PlatformApi.LoadLModel = &LoadLModelAndUploadToGPU;
-    PlatformApi.SetCollisionMesh = &SetCollisionMesh;
+    engine_api Api;
+    Api.LoadLModel = &LoadLModelAndUploadToGPU;
+    Api.SetCollisionMesh = &SetCollisionMesh;
     
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
@@ -245,7 +237,7 @@ int CALLBACK WinMain(HINSTANCE instance,
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
         
-        GameCode.GameUpdate(&PlatformApi,
+        GameCode.GameUpdate(&Api,
                             &Input,
                             &DefaultScene,
                             (void*)GameState);
