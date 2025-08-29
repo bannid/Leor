@@ -17,9 +17,9 @@ glm::vec3 CollideAndSlide(  collision_packet* Cp,
 glm::vec3 CollideWithWorld( collision_packet* Cp, 
                             leor_primitive_triangle_list Triangles)
 {
-    f32 VeryCloseDistance = .01f;
+    f32 VeryCloseDistance = .05f;
 
-    if(Cp->CollisionRecursionDepth > 5)
+    if(Cp->CollisionRecursionDepth > 3)
     {
         return Cp->E_Position;
     }

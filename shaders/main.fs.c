@@ -12,10 +12,7 @@ void main()
 {
     vec3 LightDir = normalize(vec3(1,1,-1));
     float Diffuse = clamp(.2, 1., dot(LightDir, FragNormal));
-    float Multiplier = 1.0f;
-    if(FragWorld.y < .0)
-        Multiplier = sin(FragWorld.x) * sin(FragWorld.z);
-    vec3 Colour = vec3(Diffuse) * pow(Multiplier, .1f);
+    vec3 Colour = vec3(Diffuse);
 	FragColour = vec4(Colour, 1.0f);
     if(uUseTexture)
     {

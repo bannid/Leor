@@ -18,7 +18,7 @@ InitializeEntities(game_state* State,
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
     Player.ModelIndex = State->CubeModel;
-    Player.Transform.Scale = v3(.58 / 2., 6./2., .2 / 2);
+    Player.Transform.Scale = v3(.7/2,2/2,.2/2);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
     entity Ground;
@@ -79,28 +79,6 @@ DLL_API Game_Update(GameUpdate)
         State->GameReloaded = false;
     }
     
-    // NOTE(Banni): Rudimentary character controller
-    f32 SpeedPerSecond = 2.4;
-    f32 RotationSpeedDeg = 180.0f;
-    f32 MoveSpeed = 15.0f;
-    third_person_camera* Camera = &Scene->ThirdPersonCamera;
-    f32 Speed = .2f;
-    if(Input->Keyboard.Up.IsDown)
-    {
-        State->World.Player.Velocity += v3(0,0,-Speed);
-    }
-    if(Input->Keyboard.Down.IsDown)
-    {
-        State->World.Player.Velocity += v3(0,0,Speed);
-    }
-    if(Input->Keyboard.Right.IsDown)
-    {
-        State->World.Player.YawDegrees -= 50.0f * Input->dt;
-    }
-    if(Input->Keyboard.Left.IsDown)
-    {
-        State->World.Player.YawDegrees += 50.0f * Input->dt;
-    }
     State->Player->Transform.Position = State->World.Player.Position;
     
     glm::quat YawQ = glm::angleAxis(glm::radians(State->World.Player.YawDegrees),
@@ -109,5 +87,5 @@ DLL_API Game_Update(GameUpdate)
     
     Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
     Scene->ThirdPersonCamera.Yaw = State->World.Player.YawDegrees;
-    UpdateWorld(&State->World, Input->dt);
+    UpdateWorld(&State->World, Input, Input->dt);
 }

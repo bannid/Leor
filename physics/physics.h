@@ -6,6 +6,8 @@
 #include "physics/collision/primitives.h"
 #include "physics/collision/collision.h"
 
+#define SIMULATION_FREQUENCY (1.0f / 60.0f)
+
 struct leor_physics_player
 {
     v3 Position;
@@ -18,6 +20,7 @@ struct leor_physics_world
     leor_primitive_triangle_list CollisionMesh;
     leor_physics_player Player;
     u32 GPUHandle;
+    f32 dtAccumulator;
 };
 
 #endif //PHYSICS_H

@@ -2,7 +2,7 @@ void InitializeThirdPersonCamera(third_person_camera* Camera, f32 Distance)
 {
     Camera->Distance = Distance;
     Camera->Yaw = .0f;
-    Camera->Pitch = -30.0f;
+    Camera->Pitch = -10.0f;
     Camera->MinPitchDegrees = 70.0f;
     Camera->MaxPitchDegrees = -70.0f;
 }
