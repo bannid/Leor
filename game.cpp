@@ -3,10 +3,11 @@
 #include "arena.cpp"
 #include "lists_utils.cpp"
 #include "transform.cpp"
+#include "physics/collision/collision.cpp"
 #include "physics/physics.cpp"
 
 
-#define PLAYER_START_POSITION v3(0,1,0)
+#define PLAYER_START_POSITION v3(0,3.2,0)
 
 inline void
 InitializeEntities(game_state* State,
@@ -17,7 +18,7 @@ InitializeEntities(game_state* State,
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
     Player.ModelIndex = State->CubeModel;
-    Player.Transform.Scale = v3(.58 / 2., 2./2., .2 / 2);
+    Player.Transform.Scale = v3(.58 / 2., 6./2., .2 / 2);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
     entity Ground;
@@ -35,6 +36,18 @@ InitializeEntities(game_state* State,
     House.ModelIndex = State->HouseModel;
     InsertItem(&Scene->Entites, &House);
     
+    InitTransform(&House.Transform);
+    House.Transform.Scale = v3(5, 2.25, 5);
+    House.Transform.Position = v3(10, 2.25, -10);
+    House.ModelIndex = State->HouseModel;
+    InsertItem(&Scene->Entites, &House);
+
+    InitTransform(&House.Transform);
+    House.Transform.Scale = v3(4, 2.1, 14);
+    House.Transform.Position = v3(10, 2.15, -50);
+    House.Transform.Rotation = glm::angleAxis(glm::radians(15.0f), glm::vec3(1,0,0));
+    House.ModelIndex = State->HouseModel;
+    InsertItem(&Scene->Entites, &House);
     
 }
 
@@ -61,13 +74,15 @@ DLL_API Game_Update(GameUpdate)
     if(State->GameReloaded)
     {
         InitializeEntities(State, Scene);
+        State->World.Player.Position = PLAYER_START_POSITION;
+        Api->SetCollisionMesh(Scene->Entites, &State->World);
         State->GameReloaded = false;
     }
     
     // NOTE(Banni): Rudimentary character controller
     f32 SpeedPerSecond = 2.4;
     f32 RotationSpeedDeg = 180.0f;
-    f32 MoveSpeed = 10.0f;
+    f32 MoveSpeed = 15.0f;
     third_person_camera* Camera = &Scene->ThirdPersonCamera;
     f32 Speed = .2f;
     if(Input->Keyboard.Up.IsDown)

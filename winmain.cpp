@@ -46,6 +46,7 @@
 #include "renderer/camera.cpp"
 
 #include "renderer/renderer.cpp"
+#include "physics/collision/collision.cpp"
 
 #include "engine_api.h"
 #include "game.h"
@@ -126,9 +127,14 @@ Set_Collision_Mesh(SetCollisionMesh)
     ResetList(&World->CollisionMesh);
     for(int32 i = 0; i < EntityList.Length; i++)
     {
-        entity* Entity = GetItemPointer(&EntityList, i);
-        mat4 EntityTransform = TransformToMat4(&Entity->Transform);
-        leor_model* Model = GetItemPointer(&GlobalModelsList, Entity->ModelIndex);
+        // TODO(Banni): TEMP - Do not add the player to the collision mesh
+        if (i == 0) continue;
+        entity Entity = *GetItemPointer(&EntityList, i);
+        
+        // NOTE(Banni): Make the collsion mesh little bit bigger then the actual models
+        Entity.Transform.Scale *= 1.001;
+        mat4 EntityTransform = TransformToMat4(&Entity.Transform);
+        leor_model* Model = GetItemPointer(&GlobalModelsList, Entity.ModelIndex);
         for(int32 j = 0; j < Model->Meshes.Length; j++)
         {
             leor_mesh* Mesh = GetItemPointer(&Model->Meshes, j);

@@ -15,6 +15,7 @@ InitializeRenderer(renderer* Renderer,
                                        NULL);
     if(Renderer->Window == NULL) return false;
     glfwMakeContextCurrent(Renderer->Window);
+    glfwSwapInterval(1);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return -1;
     
     // NOTE(Banni): GL Flags
