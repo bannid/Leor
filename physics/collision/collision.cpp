@@ -17,9 +17,9 @@ glm::vec3 CollideAndSlide(  collision_packet* Cp,
 glm::vec3 CollideWithWorld( collision_packet* Cp, 
                             leor_primitive_triangle_list Triangles)
 {
-    f32 VeryCloseDistance = .05f;
+    f32 VeryCloseDistance = .005f;
 
-    if(Cp->CollisionRecursionDepth > 3)
+    if(Cp->CollisionRecursionDepth > 5)
     {
         return Cp->E_Position;
     }
@@ -59,6 +59,11 @@ glm::vec3 CollideWithWorld( collision_packet* Cp,
         NewPosition = Cp->E_Position + V;
         V = glm::normalize(V);
         Cp->IntersectionPoint -= VeryCloseDistance * V;
+    }
+    // NOTE(Banni): If we are really close the surface, then move towards the sphere position a bit
+    else if(Cp->NearestDistance == 0.0f)
+    {
+        NewPosition += glm::normalize(Cp->E_Position - Cp->IntersectionPoint) * VeryCloseDistance;
     }
 
     glm::vec3 SlidePlaneOrigin = Cp->IntersectionPoint;

@@ -17,11 +17,11 @@ InitializeEntities(game_state* State,
     entity Player;
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
-    Player.ModelIndex = State->CubeModel;
-    Player.Transform.Scale = v3(.7/2,2/2,.2/2);
+    Player.ModelIndex = State->SphereModel;
+    Player.Transform.Scale = v3(.7,2,.2);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
-    entity Ground;
+     entity Ground;
     InitTransform(&Ground.Transform);
     Ground.Transform.Position = v3(0,-2,0);
     Ground.Transform.Scale = v3(100, 1, 100);
@@ -57,6 +57,7 @@ DLL_API Game_Update(GameUpdate)
     if(!State->Initialized)
     {
         State->CubeModel = Api->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
+        State->SphereModel = Api->LoadLModel("../assetsProcessed/sphere.obj.lmodel");
         State->HouseModel = Api->LoadLModel("../assetsProcessed/cube.obj.lmodel");
         
         // NOTE(Banni): Initialize the entities
@@ -73,9 +74,9 @@ DLL_API Game_Update(GameUpdate)
     }
     if(State->GameReloaded)
     {
-        InitializeEntities(State, Scene);
-        State->World.Player.Position = PLAYER_START_POSITION;
-        Api->SetCollisionMesh(Scene->Entites, &State->World);
+        // InitializeEntities(State, Scene);
+        // State->World.Player.Position = PLAYER_START_POSITION;
+        // Api->SetCollisionMesh(Scene->Entites, &State->World);
         State->GameReloaded = false;
     }
     

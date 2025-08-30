@@ -1,5 +1,5 @@
 
-#define GRAVITY glm::vec3(0,-15,0)
+#define GRAVITY glm::vec3(0,-25,0)
 
 void
 UpdateWorld(leor_physics_world* World, input* Input, f32 dt)

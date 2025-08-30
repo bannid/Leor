@@ -10,9 +10,10 @@ struct game_state
     b32                                                 Initialized;
     b32                                                 GameReloaded;
     memory_arena                                        Arena;
+    
     u32                                                 CubeModel;
     u32                                                 HouseModel;
-    
+    u32                                                 SphereModel;
     // NOTE(Banni): Simulation
     leor_physics_world                                  World;
     entity*                                             Player;
