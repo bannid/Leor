@@ -7,17 +7,17 @@
 
 struct font_character
 {
-    u32 TextureID;
-    v2 Size;
-    v2 Bearing;
-    u32 Advance;
+    u32                                 TextureID;
+    v2                                  Size;
+    v2                                  Bearing;
+    u32                                 Advance;
 };
 
 struct font_type
 {
-    font_character Characters[NUMBER_OF_CHARACTERS];
-    f32 PixelHeight;
-    b32 Loaded;
+    font_character                      Characters[NUMBER_OF_CHARACTERS];
+    f32                                 PixelHeight;
+    b32                                 Loaded;
 };
 
 #endif //FONTS_H

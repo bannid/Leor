@@ -10,17 +10,17 @@
 
 struct leor_physics_player
 {
-    v3 Position;
-    v3 Velocity;
-    f32 YawDegrees;
+    v3                                       Position;
+    v3                                       Velocity;
+    f32                                      YawDegrees;
 };
 
 struct leor_physics_world
 {
-    leor_primitive_triangle_list CollisionMesh;
-    leor_physics_player Player;
-    u32 GPUHandle;
-    f32 dtAccumulator;
+    leor_primitive_triangle_list             CollisionMesh;
+    leor_physics_player                      Player;
+    u32                                      GPUHandle;
+    f32                                      dtAccumulator;
 };
 
 #endif //PHYSICS_H

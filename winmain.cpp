@@ -81,7 +81,7 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
 {
     local_persist mouse_input LastFrameMouse;
     local_persist keyboard_input LastFrameKeyboard;
-
+    
     // NOTE(Banni): Mouse input
     real64 x;
     real64 y;
@@ -95,7 +95,7 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
     GlfwCheckState(&Input->Mouse.Right,
                    LastFrameMouse.Right,
                    glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT));
-
+    
     GlfwCheckState(&Input->Keyboard.Up,
                    LastFrameKeyboard.Up,
                    glfwGetKey(Window, GLFW_KEY_UP));
@@ -108,7 +108,7 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
     GlfwCheckState(&Input->Keyboard.Left,
                    LastFrameKeyboard.Left,
                    glfwGetKey(Window, GLFW_KEY_LEFT));
-
+    
     LastFrameMouse = Input->Mouse;
     LastFrameKeyboard = Input->Keyboard;
 }
@@ -136,7 +136,7 @@ Set_Collision_Mesh(SetCollisionMesh)
         entity Entity = *GetItemPointer(&EntityList, i);
         if (!(Entity.EnityFlags & ENTITY_FLAG_COLLIDEABLE))
             continue;
-
+        
         // NOTE(Banni): Make the collsion mesh little bit bigger then the actual models
         Entity.Transform.Scale *= 1.001;
         mat4 EntityTransform = TransformToMat4(&Entity.Transform);
@@ -150,12 +150,12 @@ Set_Collision_Mesh(SetCollisionMesh)
                 v4 PositionOne = v4(GetItemPointer(&Mesh->Vertices, k)->Position, 1.0f);
                 v4 PositionTwo = v4(GetItemPointer(&Mesh->Vertices, k + 1)->Position, 1.0f);
                 v4 PositionThree = v4(GetItemPointer(&Mesh->Vertices, k + 2)->Position, 1.0f);
-
+                
                 // NOTE(Banni): Bring the vertices to world space
                 PositionOne = EntityTransform * PositionOne;
                 PositionTwo = EntityTransform * PositionTwo;
                 PositionThree = EntityTransform * PositionThree;
-
+                
                 Triangle.V1 = v3(PositionOne.x, PositionOne.y, PositionOne.z);
                 Triangle.V2 = v3(PositionTwo.x, PositionTwo.y, PositionTwo.z);
                 Triangle.V3 = v3(PositionThree.x, PositionThree.y, PositionThree.z);
@@ -194,16 +194,16 @@ int CALLBACK WinMain(HINSTANCE instance,
                      LPSTR commandLine,
                      int showCode)
 {
-
+    
     // NOTE(Banni): Grab the memory from the OS
     memory_arena MainMemoryArena = Win32GetMemoryArena(MEGABYTE(500));
-
+    
     // NOTE(Banni): If we failed to get memory from the OS.
     if (MainMemoryArena.BasePointer == NULL)
     {
         return -1;
     }
-
+    
     // NOTE(Banni): Initiate globals
     InitiateGlobals(&MainMemoryArena);
 #if defined(DEBUG)
@@ -214,29 +214,29 @@ int CALLBACK WinMain(HINSTANCE instance,
     renderer Renderer;
     b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor", GlobalScractchArena);
     ASSERT_DEBUG(Running);
-
+    
     // NOTE(Banni): Initialize the world
     leor_physics_world World = {};
     InitList(&MainMemoryArena, &World.CollisionMesh, 10000);
-
+    
     // NOTE(Banni): Game DLL loading and reloading
     win32_game_code GameCode = Win32LoadGameDLL(false);
-
+    
     // NOTE(Banni): Keyboard/Mouse input
     input Input;
-
+    
     // NOTE(Banni): Initialize the game memory from the OS side.
     game_state *GameState = (game_state *)GetMemory(&MainMemoryArena,
                                                     sizeof(game_state));
     ZeroMemory(GameState, sizeof(game_state));
     GameState->World = &World;
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
-
+    
     // NOTE(Banni): Initiate the default scene
     scene DefaultScene = {};
     InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
-
+    
     glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f),
                                                ASPECT_RATIO,
                                                .1f,
@@ -247,18 +247,18 @@ int CALLBACK WinMain(HINSTANCE instance,
     shader_program CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
                                                             "../shaders/collision_mesh.fs.c",
                                                             GlobalScractchArena);
-
+    
     engine_api Api;
     Api.LoadLModel = &LoadLModelAndUploadToGPU;
     Api.SetCollisionMesh = &SetCollisionMesh;
-
+    
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
     f32 LastTime = CurrentTime;
-
+    
     while (1)
     {
-        TIMED_BLOCK("Main loop");
+        TIMED_BLOCK("Render Loop");
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
         if (CompareFileTime(&NewDllWriteTime, &GameCode.LastWriteTime) != 0)
         {
@@ -270,18 +270,18 @@ int CALLBACK WinMain(HINSTANCE instance,
                                             GlobalScractchArena);
             GameState->GameReloaded = true;
         }
-
+        
         GlfwProcessInput(Renderer.Window, &Input);
         CurrentTime = glfwGetTime();
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
-
+        
         GameCode.GameUpdate(&Api,
                             &Input,
                             &DefaultScene,
                             (void *)GameState);
         UpdateWorld(&World, &Input);
-
+        
         // NOTE(Banni): Draw the actual scene
         DrawScene(&Renderer,
                   &DefaultScene,
@@ -300,15 +300,17 @@ int CALLBACK WinMain(HINSTANCE instance,
                               &ProjectionMat);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-
+        
 #if defined(DEBUG)
         char BufferToPrintStuff[256];
+        f32 YOffset = 0.0f;
         // TODO(Banni): print out the debug info to the screen
         for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
         {
             timed_block_info *DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
-            snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms\n", DebugInfo->Name, DebugInfo->TimeTook);
-            OutputDebugStringA(BufferToPrintStuff);
+            snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms", DebugInfo->Name, DebugInfo->TimeTook);
+            DrawText(&Renderer, glm::vec2(10.0f, Renderer.Height - 20.0f - YOffset), BufferToPrintStuff);
+            YOffset += 20.0f;
         }
         ResetList(&GlobalFrameTimesDebugInfo);
 #endif

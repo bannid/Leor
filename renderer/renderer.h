@@ -14,11 +14,14 @@
 
 struct renderer
 {
-    GLFWwindow* Window;
-    int32 Width;
-    int32 Height;
-    const char* WindowTitle;
-    font_type Fonts;
+    GLFWwindow*                            Window;
+    int32                                  Width;
+    int32                                  Height;
+    const char*                            WindowTitle;
+    font_type                              Fonts;
+    shader_program                         FontShader;
+    glm::mat4                              ScreenProjection;
+    gl_model                               FontModel;
 };
 
 #endif //RENDERER_H
