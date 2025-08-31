@@ -88,5 +88,5 @@ DLL_API Game_Update(GameUpdate)
     
     Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
     Scene->ThirdPersonCamera.Yaw = State->World.Player.YawDegrees;
-    UpdateWorld(&State->World, Input, Input->dt);
+    UpdateWorld(&State->World, Input);
 }

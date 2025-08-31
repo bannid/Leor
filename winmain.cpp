@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <windows.h>
 
 #include <ft2build.h>
@@ -10,8 +11,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "types.h"
-#include "debug.h"
 #include "utils.h"
+#include "debug.h"
+#include "debug_internal.h"
 
 #include "transform.h"
 
@@ -51,17 +53,17 @@
 #include "engine_api.h"
 #include "game.h"
 
-
 #define WIDTH 1920
 #define HEIGHT 1080
-#define ASPECT_RATIO (f32)WIDTH/(f32)HEIGHT
+#define ASPECT_RATIO (f32) WIDTH / (f32)HEIGHT
 
 // NOTE(Banni): Globals
-global memory_arena                                 GlobalScractchArena;
-global memory_arena                                 GlobalModelsMemoryArena;
-global leor_model_list                              GlobalModelsList;
+global memory_arena GlobalScractchArena;
+global memory_arena GlobalModelsMemoryArena;
+global leor_model_list GlobalModelsList;
+global timed_block_info_list GlobalFrameTimesDebugInfo;
 
-void GlfwCheckState(button_state* ButtonState,
+void GlfwCheckState(button_state *ButtonState,
                     button_state LastState,
                     int32 KeyState)
 {
@@ -71,17 +73,17 @@ void GlfwCheckState(button_state* ButtonState,
     ButtonState->JustWentDown = ButtonState->IsDown && !LastState.IsDown;
 }
 
-void GlfwProcessInput(GLFWwindow* Window, input* Input)
+void GlfwProcessInput(GLFWwindow *Window, input *Input)
 {
-    local_persist mouse_input         LastFrameMouse;
-    local_persist keyboard_input      LastFrameKeyboard;
-    
+    local_persist mouse_input LastFrameMouse;
+    local_persist keyboard_input LastFrameKeyboard;
+
     // NOTE(Banni): Mouse input
     real64 x;
     real64 y;
     glfwGetCursorPos(Window, &x, &y);
     // TODO(Banni): Get the window height from the renderer
-    //y = GlobalEngine.Window.Height - y;
+    // y = GlobalEngine.Window.Height - y;
     Input->Mouse.Position = v2((f32)x, (f32)y);
     GlfwCheckState(&Input->Mouse.Left,
                    LastFrameMouse.Left,
@@ -89,7 +91,7 @@ void GlfwProcessInput(GLFWwindow* Window, input* Input)
     GlfwCheckState(&Input->Mouse.Right,
                    LastFrameMouse.Right,
                    glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT));
-    
+
     GlfwCheckState(&Input->Keyboard.Up,
                    LastFrameKeyboard.Up,
                    glfwGetKey(Window, GLFW_KEY_UP));
@@ -102,7 +104,7 @@ void GlfwProcessInput(GLFWwindow* Window, input* Input)
     GlfwCheckState(&Input->Keyboard.Left,
                    LastFrameKeyboard.Left,
                    glfwGetKey(Window, GLFW_KEY_LEFT));
-    
+
     LastFrameMouse = Input->Mouse;
     LastFrameKeyboard = Input->Keyboard;
 }
@@ -125,31 +127,32 @@ Load_L_Model(LoadLModelAndUploadToGPU)
 Set_Collision_Mesh(SetCollisionMesh)
 {
     ResetList(&World->CollisionMesh);
-    for(int32 i = 0; i < EntityList.Length; i++)
+    for (int32 i = 0; i < EntityList.Length; i++)
     {
         // TODO(Banni): TEMP - Do not add the player to the collision mesh
-        if (i == 0) continue;
+        if (i == 0)
+            continue;
         entity Entity = *GetItemPointer(&EntityList, i);
-        
+
         // NOTE(Banni): Make the collsion mesh little bit bigger then the actual models
         Entity.Transform.Scale *= 1.001;
         mat4 EntityTransform = TransformToMat4(&Entity.Transform);
-        leor_model* Model = GetItemPointer(&GlobalModelsList, Entity.ModelIndex);
-        for(int32 j = 0; j < Model->Meshes.Length; j++)
+        leor_model *Model = GetItemPointer(&GlobalModelsList, Entity.ModelIndex);
+        for (int32 j = 0; j < Model->Meshes.Length; j++)
         {
-            leor_mesh* Mesh = GetItemPointer(&Model->Meshes, j);
-            for(int32 k = 0; k < Mesh->Vertices.Length; k+=3)
+            leor_mesh *Mesh = GetItemPointer(&Model->Meshes, j);
+            for (int32 k = 0; k < Mesh->Vertices.Length; k += 3)
             {
                 leor_primitive_triangle Triangle;
                 v4 PositionOne = v4(GetItemPointer(&Mesh->Vertices, k)->Position, 1.0f);
-                v4 PositionTwo =  v4(GetItemPointer(&Mesh->Vertices, k + 1)->Position, 1.0f);
+                v4 PositionTwo = v4(GetItemPointer(&Mesh->Vertices, k + 1)->Position, 1.0f);
                 v4 PositionThree = v4(GetItemPointer(&Mesh->Vertices, k + 2)->Position, 1.0f);
-                
+
                 // NOTE(Banni): Bring the vertices to world space
                 PositionOne = EntityTransform * PositionOne;
                 PositionTwo = EntityTransform * PositionTwo;
                 PositionThree = EntityTransform * PositionThree;
-                
+
                 Triangle.V1 = v3(PositionOne.x, PositionOne.y, PositionOne.z);
                 Triangle.V2 = v3(PositionTwo.x, PositionTwo.y, PositionTwo.z);
                 Triangle.V3 = v3(PositionThree.x, PositionThree.y, PositionThree.z);
@@ -161,46 +164,61 @@ Set_Collision_Mesh(SetCollisionMesh)
 }
 
 inline void
-InitiateGlobals(memory_arena* Arena)
+InitiateGlobals(memory_arena *Arena)
 {
     GlobalModelsList = {};
     InitList(Arena, &GlobalModelsList, 100);
 }
 
+inline void
+InitiateGlobalDebugStuff(memory_arena *Arena)
+{
+    GlobalFrameTimesDebugInfo = {};
+    InitList(Arena, &GlobalFrameTimesDebugInfo, 200);
+}
+
+void PushDebugTimingInfo(timed_block_info Info)
+{
+    InsertItem(&GlobalFrameTimesDebugInfo, &Info);
+}
+
 int CALLBACK WinMain(HINSTANCE instance,
-					 HINSTANCE prevInstance,
-					 LPSTR commandLine,
-					 int showCode)
+                     HINSTANCE prevInstance,
+                     LPSTR commandLine,
+                     int showCode)
 {
     renderer Renderer;
     b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor");
     ASSERT_DEBUG(Running);
     memory_arena MainMemoryArena = Win32GetMemoryArena(MEGABYTE(500));
     // NOTE(Banni): If we failed to get memory from the OS.
-    if(MainMemoryArena.BasePointer == NULL) return -1;
+    if (MainMemoryArena.BasePointer == NULL)
+        return -1;
     GlobalScractchArena = GetMemoryArena(&MainMemoryArena,
                                          MEGABYTE(10));
     win32_game_code GameCode = Win32LoadGameDLL(false);
     input Input;
-    
-    game_state* GameState = (game_state*)GetMemory(&MainMemoryArena,
-                                                   sizeof(game_state));
+
+    game_state *GameState = (game_state *)GetMemory(&MainMemoryArena,
+                                                    sizeof(game_state));
     ZeroMemory(GameState, sizeof(game_state));
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
-    
+
     // NOTE(Banni): Initiate globals
     InitiateGlobals(&MainMemoryArena);
-    
+#if defined(DEBUG)
+    InitiateGlobalDebugStuff(&MainMemoryArena);
+#endif
+
     // NOTE(Banni): Initiate the default scene
     scene DefaultScene = {};
     InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
-    
-    
+
     GlobalModelsMemoryArena = GetMemoryArena(&MainMemoryArena,
                                              MEGABYTE(10));
-    
-    glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f), 
+
+    glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f),
                                                ASPECT_RATIO,
                                                .1f,
                                                500.0f);
@@ -210,19 +228,20 @@ int CALLBACK WinMain(HINSTANCE instance,
     shader_program CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
                                                             "../shaders/collision_mesh.fs.c",
                                                             GlobalScractchArena);
-    
+
     engine_api Api;
     Api.LoadLModel = &LoadLModelAndUploadToGPU;
     Api.SetCollisionMesh = &SetCollisionMesh;
-    
+
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
     f32 LastTime = CurrentTime;
-    
-    while(1)
+
+    while (1)
     {
+        TIMED_BLOCK("Main loop");
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
-        if(CompareFileTime(&NewDllWriteTime, &GameCode.LastWriteTime) != 0)
+        if (CompareFileTime(&NewDllWriteTime, &GameCode.LastWriteTime) != 0)
         {
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
@@ -232,26 +251,26 @@ int CALLBACK WinMain(HINSTANCE instance,
                                             GlobalScractchArena);
             GameState->GameReloaded = true;
         }
-        
+
         GlfwProcessInput(Renderer.Window, &Input);
         CurrentTime = glfwGetTime();
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
-        
+
         GameCode.GameUpdate(&Api,
                             &Input,
                             &DefaultScene,
-                            (void*)GameState);
-        
+                            (void *)GameState);
+
         // NOTE(Banni): Draw the actual scene
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         DrawScene(&Renderer,
                   &DefaultScene,
                   &MainShader,
                   &ProjectionMat,
                   &GlobalModelsList);
-        
-        
+
+#if 0        
         // NOTE(Banni): Draw the collision mesh
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
@@ -261,10 +280,22 @@ int CALLBACK WinMain(HINSTANCE instance,
                           &CollisionViewMat,
                           &ProjectionMat
                           );
-        
+#endif
+
+#if defined(DEBUG)
+        char BufferToPrintStuff[256];
+        // TODO(Banni): print out the debug info to the screen
+        for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
+        {
+            timed_block_info* DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
+            snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms\n", DebugInfo->Name, DebugInfo->TimeTook);
+            OutputDebugStringA(BufferToPrintStuff);
+        }
+        ResetList(&GlobalFrameTimesDebugInfo);
+#endif
         glfwSwapBuffers(Renderer.Window);
         glfwPollEvents();
-        if(!RendererRunning(&Renderer))
+        if (!RendererRunning(&Renderer))
         {
             break;
         }

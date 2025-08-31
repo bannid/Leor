@@ -2,7 +2,7 @@
 #define GRAVITY glm::vec3(0,-25,0)
 
 void
-UpdateWorld(leor_physics_world* World, input* Input, f32 dt)
+UpdateWorld(leor_physics_world* World, input* Input)
 {
     World->dtAccumulator += Input->dt;
     while(World->dtAccumulator >= SIMULATION_FREQUENCY)
@@ -44,7 +44,7 @@ UpdateWorld(leor_physics_world* World, input* Input, f32 dt)
         Cp.W_Position = Player->Position;
         Cp.W_Velocity = Velocity;
         Player->Position = CollideAndSlide(&Cp, World->CollisionMesh);
-        Player->Velocity *= .98f;
+        Player->Velocity *= .95f;
         World->dtAccumulator -= SIMULATION_FREQUENCY;
     }
 }

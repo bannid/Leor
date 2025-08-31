@@ -11,18 +11,6 @@
 #define DEBUG_PRINT(x) OutputDebugStringA(x)
 #endif //WIN_32
 
-struct timed_block
-{
-    timed_block()
-    {
-        
-    }
-    ~timed_block()
-    {
-        
-    }
-};
-
 #else
 
 #define ASSERT_DEBUG(expression)
