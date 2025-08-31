@@ -15,7 +15,7 @@ struct game_state
     u32                                                 HouseModel;
     u32                                                 SphereModel;
     // NOTE(Banni): Simulation
-    leor_physics_world                                  World;
+    leor_physics_world*                                 World;
     entity*                                             Player;
 };
 

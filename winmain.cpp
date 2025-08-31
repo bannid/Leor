@@ -49,6 +49,7 @@
 
 #include "renderer/renderer.cpp"
 #include "physics/collision/collision.cpp"
+#include "physics/physics.cpp"
 
 #include "engine_api.h"
 #include "game.h"
@@ -190,10 +191,16 @@ int CALLBACK WinMain(HINSTANCE instance,
     renderer Renderer;
     b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor");
     ASSERT_DEBUG(Running);
+
     memory_arena MainMemoryArena = Win32GetMemoryArena(MEGABYTE(500));
     // NOTE(Banni): If we failed to get memory from the OS.
     if (MainMemoryArena.BasePointer == NULL)
         return -1;
+
+    // NOTE(Banni): Initialize the world
+    leor_physics_world World;
+    InitList(&MainMemoryArena, &World.CollisionMesh, 10000);
+
     GlobalScractchArena = GetMemoryArena(&MainMemoryArena,
                                          MEGABYTE(10));
     win32_game_code GameCode = Win32LoadGameDLL(false);
@@ -202,6 +209,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     game_state *GameState = (game_state *)GetMemory(&MainMemoryArena,
                                                     sizeof(game_state));
     ZeroMemory(GameState, sizeof(game_state));
+    GameState->World = &World;
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
 
     // NOTE(Banni): Initiate globals
@@ -261,6 +269,7 @@ int CALLBACK WinMain(HINSTANCE instance,
                             &Input,
                             &DefaultScene,
                             (void *)GameState);
+        UpdateWorld(&World, &Input);
 
         // NOTE(Banni): Draw the actual scene
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -287,7 +296,7 @@ int CALLBACK WinMain(HINSTANCE instance,
         // TODO(Banni): print out the debug info to the screen
         for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
         {
-            timed_block_info* DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
+            timed_block_info *DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
             snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms\n", DebugInfo->Name, DebugInfo->TimeTook);
             OutputDebugStringA(BufferToPrintStuff);
         }

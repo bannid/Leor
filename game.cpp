@@ -3,8 +3,6 @@
 #include "arena.cpp"
 #include "lists_utils.cpp"
 #include "transform.cpp"
-#include "physics/collision/collision.cpp"
-#include "physics/physics.cpp"
 
 
 #define PLAYER_START_POSITION v3(0,3.2,0)
@@ -62,13 +60,9 @@ DLL_API Game_Update(GameUpdate)
         
         // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Scene);
-        
-        // NOTE(Banni): Initialize the static mesh and stuff
-        InitList(&State->Arena, &State->World.CollisionMesh, 10000);
-        State->World.Player.Position = PLAYER_START_POSITION;
-        State->World.Player.Velocity = v3(0);
-        Api->SetCollisionMesh(Scene->Entites, &State->World);
-        
+        State->World->Player.Position = PLAYER_START_POSITION;
+        State->World->Player.Velocity = v3(0);
+        Api->SetCollisionMesh(Scene->Entites, State->World);
         
         State->Initialized = true;
     }
@@ -80,13 +74,13 @@ DLL_API Game_Update(GameUpdate)
         State->GameReloaded = false;
     }
     
-    State->Player->Transform.Position = State->World.Player.Position;
+    State->Player->Transform.Position = State->World->Player.Position;
     
-    glm::quat YawQ = glm::angleAxis(glm::radians(State->World.Player.YawDegrees),
+    glm::quat YawQ = glm::angleAxis(glm::radians(State->World->Player.YawDegrees),
                                     glm::vec3(0,1,0));
     State->Player->Transform.Rotation = YawQ;
     
     Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
-    Scene->ThirdPersonCamera.Yaw = State->World.Player.YawDegrees;
-    UpdateWorld(&State->World, Input);
+    Scene->ThirdPersonCamera.Yaw = State->World->Player.YawDegrees;
+    
 }
