@@ -18,6 +18,7 @@ struct renderer
     int32 Width;
     int32 Height;
     const char* WindowTitle;
+    font_type Fonts;
 };
 
 #endif //RENDERER_H

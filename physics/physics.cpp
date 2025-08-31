@@ -1,4 +1,3 @@
-
 #define GRAVITY glm::vec3(0, -25, 0)
 
 void UpdateWorld(leor_physics_world *World, input *Input)
@@ -7,7 +6,6 @@ void UpdateWorld(leor_physics_world *World, input *Input)
     World->dtAccumulator += Input->dt;
     while (World->dtAccumulator >= SIMULATION_FREQUENCY)
     {
-
         f32 RotationSpeedDeg = 180.0f;
         f32 MoveSpeed = 15.0f;
         f32 Speed = 1.0f;

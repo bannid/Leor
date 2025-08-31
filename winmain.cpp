@@ -64,6 +64,9 @@ global memory_arena GlobalModelsMemoryArena;
 global leor_model_list GlobalModelsList;
 global timed_block_info_list GlobalFrameTimesDebugInfo;
 
+// NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
+global debug_state GlobalDebugState = {};
+
 void GlfwCheckState(button_state *ButtonState,
                     button_state LastState,
                     int32 KeyState)
@@ -130,10 +133,9 @@ Set_Collision_Mesh(SetCollisionMesh)
     ResetList(&World->CollisionMesh);
     for (int32 i = 0; i < EntityList.Length; i++)
     {
-        // TODO(Banni): TEMP - Do not add the player to the collision mesh
-        if (i == 0)
-            continue;
         entity Entity = *GetItemPointer(&EntityList, i);
+        if (!(Entity.EnityFlags & ENTITY_FLAG_COLLIDEABLE))
+            continue;
 
         // NOTE(Banni): Make the collsion mesh little bit bigger then the actual models
         Entity.Transform.Scale *= 1.001;
@@ -169,6 +171,10 @@ InitiateGlobals(memory_arena *Arena)
 {
     GlobalModelsList = {};
     InitList(Arena, &GlobalModelsList, 100);
+    GlobalScractchArena = GetMemoryArena(Arena,
+                                         MEGABYTE(10));
+    GlobalModelsMemoryArena = GetMemoryArena(Arena,
+                                             MEGABYTE(10));
 }
 
 inline void
@@ -188,43 +194,48 @@ int CALLBACK WinMain(HINSTANCE instance,
                      LPSTR commandLine,
                      int showCode)
 {
-    renderer Renderer;
-    b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor");
-    ASSERT_DEBUG(Running);
 
+    // NOTE(Banni): Grab the memory from the OS
     memory_arena MainMemoryArena = Win32GetMemoryArena(MEGABYTE(500));
+
     // NOTE(Banni): If we failed to get memory from the OS.
     if (MainMemoryArena.BasePointer == NULL)
+    {
         return -1;
-
-    // NOTE(Banni): Initialize the world
-    leor_physics_world World;
-    InitList(&MainMemoryArena, &World.CollisionMesh, 10000);
-
-    GlobalScractchArena = GetMemoryArena(&MainMemoryArena,
-                                         MEGABYTE(10));
-    win32_game_code GameCode = Win32LoadGameDLL(false);
-    input Input;
-
-    game_state *GameState = (game_state *)GetMemory(&MainMemoryArena,
-                                                    sizeof(game_state));
-    ZeroMemory(GameState, sizeof(game_state));
-    GameState->World = &World;
-    GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
+    }
 
     // NOTE(Banni): Initiate globals
     InitiateGlobals(&MainMemoryArena);
 #if defined(DEBUG)
     InitiateGlobalDebugStuff(&MainMemoryArena);
 #endif
+    
+    // NOTE(Banni): Initialize the renderer
+    renderer Renderer;
+    b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor", GlobalScractchArena);
+    ASSERT_DEBUG(Running);
+
+    // NOTE(Banni): Initialize the world
+    leor_physics_world World = {};
+    InitList(&MainMemoryArena, &World.CollisionMesh, 10000);
+
+    // NOTE(Banni): Game DLL loading and reloading
+    win32_game_code GameCode = Win32LoadGameDLL(false);
+
+    // NOTE(Banni): Keyboard/Mouse input
+    input Input;
+
+    // NOTE(Banni): Initialize the game memory from the OS side.
+    game_state *GameState = (game_state *)GetMemory(&MainMemoryArena,
+                                                    sizeof(game_state));
+    ZeroMemory(GameState, sizeof(game_state));
+    GameState->World = &World;
+    GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
 
     // NOTE(Banni): Initiate the default scene
     scene DefaultScene = {};
     InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
-
-    GlobalModelsMemoryArena = GetMemoryArena(&MainMemoryArena,
-                                             MEGABYTE(10));
 
     glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f),
                                                ASPECT_RATIO,
@@ -272,24 +283,23 @@ int CALLBACK WinMain(HINSTANCE instance,
         UpdateWorld(&World, &Input);
 
         // NOTE(Banni): Draw the actual scene
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         DrawScene(&Renderer,
                   &DefaultScene,
                   &MainShader,
                   &ProjectionMat,
                   &GlobalModelsList);
-
-#if 0        
-        // NOTE(Banni): Draw the collision mesh
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
-        DrawCollisionMesh(&Renderer,
-                          &CollisionMeshShader,
-                          &GameState->World,
-                          &CollisionViewMat,
-                          &ProjectionMat
-                          );
-#endif
+        if (GlobalDebugState.DrawCollisionMesh)
+        {
+            // NOTE(Banni): Draw the collision mesh
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
+            DrawCollisionMesh(&Renderer,
+                              &CollisionMeshShader,
+                              GameState->World,
+                              &CollisionViewMat,
+                              &ProjectionMat);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
 #if defined(DEBUG)
         char BufferToPrintStuff[256];

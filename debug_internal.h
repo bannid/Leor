@@ -31,6 +31,12 @@ struct timed_block
     }
 };
 
+struct debug_state
+{
+    b32 DrawCollisionMesh;
+    b32 DrawTimeUtils;
+};
+
 #define TIMED_BLOCK(x) timed_block T##__FUNCTION____FILE_____LINE__(x)
 
 #else 
