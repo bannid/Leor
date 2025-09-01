@@ -123,7 +123,8 @@ function GenerateSource(list)
 
 function WriteLists() {
     const internalLists = [
-        'timed_block_info'       
+        'timed_block_info',
+        'debug_variable'    
     ];
     const sharedLists = [
         'entity',

@@ -65,7 +65,17 @@ global leor_model_list GlobalModelsList;
 global timed_block_info_list GlobalFrameTimesDebugInfo;
 
 // NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
-global debug_state GlobalDebugState = {};
+global debug_state GlobalDebugState;
+global debug_variable_list GlobalDebugVariableList;
+
+void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void* Pointer)
+{
+    debug_variable Variable;
+    Variable.Name = Name;
+    Variable.Type = Type;
+    Variable.Pointer = Pointer;
+    InsertItem(&GlobalDebugVariableList, &Variable);
+}
 
 void GlfwCheckState(button_state *ButtonState,
                     button_state LastState,
@@ -175,6 +185,9 @@ InitiateGlobals(memory_arena *Arena)
                                          MEGABYTE(10));
     GlobalModelsMemoryArena = GetMemoryArena(Arena,
                                              MEGABYTE(10));
+    GlobalDebugState = {};
+    GlobalDebugVariableList = {};
+    InitList(Arena, &GlobalDebugVariableList, 200);
 }
 
 inline void
@@ -313,6 +326,27 @@ int CALLBACK WinMain(HINSTANCE instance,
             YOffset += 20.0f;
         }
         ResetList(&GlobalFrameTimesDebugInfo);
+        
+        YOffset += 50.0f;
+        
+        // TODO(Banni): print out the debug info to the screen
+        for (int32 i = 0; i < GlobalDebugVariableList.Length; i++)
+        {
+            debug_variable *Variable = GetItemPointer(&GlobalDebugVariableList, i);
+            switch(Variable->Type)
+            {
+                case Debug_Variable_Type_V3:
+                {
+                    v3* Pointer = (v3*)Variable->Pointer;
+                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
+                             "%s: (%.2f,%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y, Pointer->z);
+                }break;
+            }
+            DrawText(&Renderer, glm::vec2(10.0f, Renderer.Height - 20.0f - YOffset), BufferToPrintStuff);
+            YOffset += 20.0f;
+        }
+        
+        ResetList(&GlobalDebugVariableList);
 #endif
         glfwSwapBuffers(Renderer.Window);
         glfwPollEvents();

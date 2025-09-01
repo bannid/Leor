@@ -3,6 +3,8 @@
 void UpdateWorld(leor_physics_world *World, input *Input)
 {
     TIMED_BLOCK("Update world");
+    DEBUG_PUSH_VARIABLE("Physics Player Position", Debug_Variable_Type_V3, &World->Player.Position);
+    DEBUG_PUSH_VARIABLE("Physics Player Velocity", Debug_Variable_Type_V3, &World->Player.Velocity);
     World->dtAccumulator += Input->dt;
     while (World->dtAccumulator >= SIMULATION_FREQUENCY)
     {
@@ -29,14 +31,14 @@ void UpdateWorld(leor_physics_world *World, input *Input)
         glm::quat Q = glm::angleAxis(glm::radians(Player->YawDegrees),
                                      glm::vec3(0, 1, 0));
         v3 VelocityRotated = Q * Player->Velocity;
-
+        
         v3 Velocity = VelocityRotated * SIMULATION_FREQUENCY;
         collision_packet Cp;
         Cp.EllipsoidSpace = v3(.7, 2, .2);
         Cp.W_Position = Player->Position;
         Cp.W_Velocity = Velocity;
         Player->Position = CollideAndSlide(&Cp, World->CollisionMesh);
-
+        
         Velocity = GRAVITY * SIMULATION_FREQUENCY;
         Cp.W_Position = Player->Position;
         Cp.W_Velocity = Velocity;

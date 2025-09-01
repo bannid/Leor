@@ -37,10 +37,31 @@ struct debug_state
     b32 DrawTimeUtils;
 };
 
-#define TIMED_BLOCK(x) timed_block T##__FUNCTION____FILE_____LINE__(x)
+enum debug_variable_type
+{
+    Debug_Variable_Type_Int,
+    Debug_Variable_Type_Float,
+    Debug_Variable_Type_Bool,
+    Debug_Variable_Type_V3,
+    Debug_Variable_Type_V4
+};
 
+struct debug_variable
+{
+    const char* Name;
+    debug_variable_type Type;
+    void* Pointer;
+};
+
+Declare_List(debug_variable);
+
+void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void* Pointer);
+
+#define TIMED_BLOCK(x) timed_block T##__FUNCTION____FILE_____LINE__(x)
+#define DEBUG_PUSH_VARIABLE(Name, Type, Ptr) DebugPushVariableToGlobal(Name,Type,Ptr)
 #else 
 #define TIMED_BLOCK(x)
+#define DEBUG_PUSH_VARIABLE(Name, Type, Ptr)
 #endif
 
 #endif
