@@ -12,20 +12,27 @@
 
 #include "types.h"
 #include "utils.h"
+#include "lists.h"
 #include "debug.h"
 #include "debug_internal.h"
-
 #include "transform.h"
-
 #include "common_layer.h"
-
 #include "arena.h"
-
 #include "win32/win32.h"
-
 #include "physics/physics.h"
-
 #include "renderer/renderer.h"
+
+
+// NOTE(Banni): Globals
+global memory_arena                                    GlobalScractchArena;
+global memory_arena                                    GlobalModelsMemoryArena;
+global leor_model_list                                 GlobalModelsList;
+global timed_block_info_list                           GlobalFrameTimesDebugInfo;
+global renderer                                        GlobalRenderer;
+// NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
+global debug_state GlobalDebugState;
+global debug_variable_list GlobalDebugVariableList;
+
 
 // NOTE(Banni): Functions
 #include "transform.cpp"
@@ -51,6 +58,8 @@
 #include "physics/collision/collision.cpp"
 #include "physics/physics.cpp"
 
+#include "debugUI.cpp"
+
 #include "engine_api.h"
 #include "game.h"
 
@@ -58,15 +67,10 @@
 #define HEIGHT 1080
 #define ASPECT_RATIO (f32) WIDTH / (f32)HEIGHT
 
-// NOTE(Banni): Globals
-global memory_arena GlobalScractchArena;
-global memory_arena GlobalModelsMemoryArena;
-global leor_model_list GlobalModelsList;
-global timed_block_info_list GlobalFrameTimesDebugInfo;
-
-// NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
-global debug_state GlobalDebugState;
-global debug_variable_list GlobalDebugVariableList;
+#define MAX_TRIANGLES_IN_COLLISION_MESH              10000
+#define MAX_MODELS                                   200
+#define MAX_ENTITIES                                 200
+#define MAX_DEBUG_VARIABLES                          200
 
 void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void* Pointer)
 {
@@ -180,21 +184,19 @@ inline void
 InitiateGlobals(memory_arena *Arena)
 {
     GlobalModelsList = {};
-    InitList(Arena, &GlobalModelsList, 100);
-    GlobalScractchArena = GetMemoryArena(Arena,
-                                         MEGABYTE(10));
-    GlobalModelsMemoryArena = GetMemoryArena(Arena,
-                                             MEGABYTE(10));
-    GlobalDebugState = {};
-    GlobalDebugVariableList = {};
-    InitList(Arena, &GlobalDebugVariableList, 200);
+    InitList(Arena, &GlobalModelsList, MAX_MODELS);
+    GlobalScractchArena = GetMemoryArena(Arena, MEGABYTE(10));
+    GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
 }
 
 inline void
 InitiateGlobalDebugStuff(memory_arena *Arena)
 {
     GlobalFrameTimesDebugInfo = {};
-    InitList(Arena, &GlobalFrameTimesDebugInfo, 200);
+    InitList(Arena, &GlobalFrameTimesDebugInfo, MAX_DEBUG_VARIABLES);
+    GlobalDebugState = {};
+    GlobalDebugVariableList = {};
+    InitList(Arena, &GlobalDebugVariableList, MAX_DEBUG_VARIABLES);
 }
 
 void PushDebugTimingInfo(timed_block_info Info)
@@ -224,13 +226,13 @@ int CALLBACK WinMain(HINSTANCE instance,
 #endif
     
     // NOTE(Banni): Initialize the renderer
-    renderer Renderer;
-    b32 Running = InitializeRenderer(&Renderer, WIDTH, HEIGHT, "Leor", GlobalScractchArena);
+    
+    b32 Running = InitializeRenderer(&GlobalRenderer, WIDTH, HEIGHT, "Leor", GlobalScractchArena);
     ASSERT_DEBUG(Running);
     
     // NOTE(Banni): Initialize the world
     leor_physics_world World = {};
-    InitList(&MainMemoryArena, &World.CollisionMesh, 10000);
+    InitList(&MainMemoryArena, &World.CollisionMesh, MAX_TRIANGLES_IN_COLLISION_MESH);
     
     // NOTE(Banni): Game DLL loading and reloading
     win32_game_code GameCode = Win32LoadGameDLL(false);
@@ -248,7 +250,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     // NOTE(Banni): Initiate the default scene
     scene DefaultScene = {};
     InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
-    InitList(&MainMemoryArena, &DefaultScene.Entites, 100);
+    InitList(&MainMemoryArena, &DefaultScene.Entites, MAX_ENTITIES);
     
     glm::mat4 ProjectionMat = glm::perspective(glm::radians(50.0f),
                                                ASPECT_RATIO,
@@ -278,13 +280,14 @@ int CALLBACK WinMain(HINSTANCE instance,
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
             // TODO(Banni): Temp code. Reload the shader.
-            MainShader = LoadShaderFromFile("../shaders/main.vs.c",
-                                            "../shaders/main.fs.c",
-                                            GlobalScractchArena);
+            MainShader = LoadShaderFromFile("../shaders/main.vs.c", "../shaders/main.fs.c", GlobalScractchArena);
+            CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
+                                                     "../shaders/collision_mesh.fs.c",
+                                                     GlobalScractchArena);
             GameState->GameReloaded = true;
         }
         
-        GlfwProcessInput(Renderer.Window, &Input);
+        GlfwProcessInput(GlobalRenderer.Window, &Input);
         CurrentTime = glfwGetTime();
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
@@ -296,61 +299,32 @@ int CALLBACK WinMain(HINSTANCE instance,
         UpdateWorld(&World, &Input);
         
         // NOTE(Banni): Draw the actual scene
-        DrawScene(&Renderer,
+        DrawScene(&GlobalRenderer,
                   &DefaultScene,
                   &MainShader,
                   &ProjectionMat,
                   &GlobalModelsList);
-        if (GlobalDebugState.DrawCollisionMesh)
+        
+#if defined(DEBUG)
+        // TODO(Banni): TEMP
+        if (GlobalDebugState.DrawCollisionMesh || true)
         {
             // NOTE(Banni): Draw the collision mesh
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glLineWidth(2.0f);
             glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
-            DrawCollisionMesh(&Renderer,
+            DrawCollisionMesh(&GlobalRenderer,
                               &CollisionMeshShader,
                               GameState->World,
                               &CollisionViewMat,
                               &ProjectionMat);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-        
-#if defined(DEBUG)
-        char BufferToPrintStuff[256];
-        f32 YOffset = 0.0f;
-        // TODO(Banni): print out the debug info to the screen
-        for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
-        {
-            timed_block_info *DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
-            snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms", DebugInfo->Name, DebugInfo->TimeTook);
-            DrawText(&Renderer, glm::vec2(10.0f, Renderer.Height - 20.0f - YOffset), BufferToPrintStuff);
-            YOffset += 20.0f;
-        }
-        ResetList(&GlobalFrameTimesDebugInfo);
-        
-        YOffset += 50.0f;
-        
-        // TODO(Banni): print out the debug info to the screen
-        for (int32 i = 0; i < GlobalDebugVariableList.Length; i++)
-        {
-            debug_variable *Variable = GetItemPointer(&GlobalDebugVariableList, i);
-            switch(Variable->Type)
-            {
-                case Debug_Variable_Type_V3:
-                {
-                    v3* Pointer = (v3*)Variable->Pointer;
-                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
-                             "%s: (%.2f,%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y, Pointer->z);
-                }break;
-            }
-            DrawText(&Renderer, glm::vec2(10.0f, Renderer.Height - 20.0f - YOffset), BufferToPrintStuff);
-            YOffset += 20.0f;
-        }
-        
-        ResetList(&GlobalDebugVariableList);
+        DrawDebugUI();
 #endif
-        glfwSwapBuffers(Renderer.Window);
+        glfwSwapBuffers(GlobalRenderer.Window);
         glfwPollEvents();
-        if (!RendererRunning(&Renderer))
+        if (!RendererRunning(&GlobalRenderer))
         {
             break;
         }

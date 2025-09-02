@@ -7,6 +7,7 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
     
     Renderer->Window = glfwCreateWindow(Width,
                                         Height,
@@ -26,7 +27,9 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     
     // NOTE(Banni): GL Flags
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
+    glEnable(GL_MULTISAMPLE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // NOTE(Banni): Load the fonts

@@ -2,7 +2,7 @@ const fs = require('fs');
 
 function ImplementInitFunction(typeName) {
     const functionDefinition = `
-void InitList(memory_arena* arena, ${typeName}_list* List, u32 Size)
+void InitList(memory_arena* arena, ${typeName}* List, u32 Size)
 {
     ASSERT_DEBUG(!List->Initialized);
     List->Size = Size;
@@ -16,7 +16,7 @@ void InitList(memory_arena* arena, ${typeName}_list* List, u32 Size)
 
 function ImplementDeinitFunction(typeName) {
     const functionDefinition = `
-void DeInitList(${typeName}_list* List)
+void DeInitList(${typeName}* List)
 {
     ASSERT_DEBUG(List->Initialized);
     List->Initialized = false;
@@ -27,7 +27,7 @@ void DeInitList(${typeName}_list* List)
 
 function ImplementResetListFunction(typeName) {
     const functionDefinition = `
-void ResetList(${typeName}_list* List)
+void ResetList(${typeName}* List)
 {
     ASSERT_DEBUG(List->Initialized);
     List->Length = 0;
@@ -38,7 +38,7 @@ void ResetList(${typeName}_list* List)
 
 function ImplementInsertItemFunction(typeName) {
     const functionDefinition = `
-${typeName}* InsertItem(${typeName}_list* List, ${typeName}* Item)
+${typeName}* InsertItem(${typeName}* List, ${typeName}* Item)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
@@ -52,7 +52,7 @@ ${typeName}* InsertItem(${typeName}_list* List, ${typeName}* Item)
 
 function ImplementPushItemAtFrontFunction(typeName) {
     const functionDefinition = `
-void InsertItemFront(${typeName}_list* List, ${typeName}* Item)
+void InsertItemFront(${typeName}* List, ${typeName}* Item)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
@@ -70,7 +70,7 @@ void InsertItemFront(${typeName}_list* List, ${typeName}* Item)
 
 function ImplementPopItemFront(typeName) {
     const functionDefinition = `
-void PopItemFront(${typeName}_list* List)
+void PopItemFront(${typeName}* List)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
@@ -88,7 +88,7 @@ void PopItemFront(${typeName}_list* List)
 
 function ImplementGetItemFunction(typeName) {
     const functionDefinition = `
-${typeName}* GetItemPointer(${typeName}_list* List,u32 Index)
+${typeName}* GetItemPointer(${typeName}* List,u32 Index)
 {
     ASSERT_DEBUG(Index < List->Length);
     ${typeName}* ptr = List->Items + Index;
@@ -96,7 +96,7 @@ ${typeName}* GetItemPointer(${typeName}_list* List,u32 Index)
 }
     `;
     const functionDefinition2 = `
-${typeName} GetItem(${typeName}_list* List,u32 Index)
+${typeName} GetItem(${typeName}* List,u32 Index)
 {
     ASSERT_DEBUG(Index < List->Length);
     ${typeName}* ptr = List->Items + Index;
@@ -123,15 +123,18 @@ function GenerateSource(list)
 
 function WriteLists() {
     const internalLists = [
-        'timed_block_info',
-        'debug_variable'    
+        'timed_block_info_list',
+        'debug_variable_list'    
     ];
     const sharedLists = [
-        'entity',
-        'leor_vertex',
-        'leor_mesh',
-        'leor_model',
-        'leor_primitive_triangle'
+        'entity_list',
+        'leor_vertex_list',
+        'leor_mesh_list',
+        'leor_model_list',
+        'u32',
+        'int32',
+        'f32',
+        'leor_primitive_triangle_list'
     ];
     let sharedListsSource = GenerateSource(sharedLists);
     let internalListsSource = GenerateSource(internalLists);

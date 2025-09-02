@@ -18,6 +18,7 @@
 #include "types.h"
 #include "debug.h"
 #include "utils.h"
+#include "lists.h"
 #include "physics/collision/primitives.h"
 #include "physics/physics.h"
 #include "transform.h"

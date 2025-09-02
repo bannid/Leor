@@ -1,10 +1,10 @@
-#define GRAVITY glm::vec3(0, -25, 0)
+#define GRAVITY glm::vec3(0, -15, 0)
 
 void UpdateWorld(leor_physics_world *World, input *Input)
 {
     TIMED_BLOCK("Update world");
-    DEBUG_PUSH_VARIABLE("Physics Player Position", Debug_Variable_Type_V3, &World->Player.Position);
-    DEBUG_PUSH_VARIABLE("Physics Player Velocity", Debug_Variable_Type_V3, &World->Player.Velocity);
+    DEBUG_PUSH_VARIABLE("Player Position", Debug_Variable_Type_V3, &World->Player.Position);
+    DEBUG_PUSH_VARIABLE("Player Velocity", Debug_Variable_Type_V3, &World->Player.Velocity);
     World->dtAccumulator += Input->dt;
     while (World->dtAccumulator >= SIMULATION_FREQUENCY)
     {
@@ -34,7 +34,7 @@ void UpdateWorld(leor_physics_world *World, input *Input)
         
         v3 Velocity = VelocityRotated * SIMULATION_FREQUENCY;
         collision_packet Cp;
-        Cp.EllipsoidSpace = v3(.7, 2, .2);
+        Cp.EllipsoidSpace = v3(.3, 1, .1);
         Cp.W_Position = Player->Position;
         Cp.W_Velocity = Velocity;
         Player->Position = CollideAndSlide(&Cp, World->CollisionMesh);

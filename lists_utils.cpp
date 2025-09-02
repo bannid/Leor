@@ -279,6 +279,216 @@ void PopItemFront(leor_model_list* List)
     List->Length--;
 }
     
+void ResetList(u32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    
+void InitList(memory_arena* arena, u32_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (u32*)GetMemory(arena,Size * sizeof(u32));
+    List->Initialized = true;
+}
+    
+u32* InsertItem(u32_list* List, u32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    
+u32* GetItemPointer(u32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    u32* ptr = List->Items + Index;
+    return ptr;
+}
+    
+u32 GetItem(u32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    u32* ptr = List->Items + Index;
+    return *ptr;
+}
+    
+void DeInitList(u32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    
+void InsertItemFront(u32_list* List, u32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    
+void PopItemFront(u32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    
+void ResetList(int32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    
+void InitList(memory_arena* arena, int32_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (int32*)GetMemory(arena,Size * sizeof(int32));
+    List->Initialized = true;
+}
+    
+int32* InsertItem(int32_list* List, int32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    int32* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    
+int32* GetItemPointer(int32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    int32* ptr = List->Items + Index;
+    return ptr;
+}
+    
+int32 GetItem(int32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    int32* ptr = List->Items + Index;
+    return *ptr;
+}
+    
+void DeInitList(int32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    
+void InsertItemFront(int32_list* List, int32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    
+void PopItemFront(int32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    
+void ResetList(f32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    
+void InitList(memory_arena* arena, f32_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (f32*)GetMemory(arena,Size * sizeof(f32));
+    List->Initialized = true;
+}
+    
+f32* InsertItem(f32_list* List, f32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    f32* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    
+f32* GetItemPointer(f32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    f32* ptr = List->Items + Index;
+    return ptr;
+}
+    
+f32 GetItem(f32_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    f32* ptr = List->Items + Index;
+    return *ptr;
+}
+    
+void DeInitList(f32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    
+void InsertItemFront(f32_list* List, f32* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    
+void PopItemFront(f32_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    
 void ResetList(leor_primitive_triangle_list* List)
 {
     ASSERT_DEBUG(List->Initialized);

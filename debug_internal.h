@@ -37,6 +37,7 @@ struct debug_state
     b32 DrawTimeUtils;
 };
 
+// TODO(Banni): Maybe we can move this to debug.h?
 enum debug_variable_type
 {
     Debug_Variable_Type_Int,

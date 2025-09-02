@@ -4,7 +4,7 @@
 #include "lists_utils.cpp"
 #include "transform.cpp"
 
-#define PLAYER_START_POSITION v3(0, 3.2, 0)
+#define PLAYER_START_POSITION v3(0, 13.2, 0)
 
 inline void
 InitializeEntities(game_state *State,
@@ -16,38 +16,23 @@ InitializeEntities(game_state *State,
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
     Player.ModelIndex = State->CubeModel;
-    Player.Transform.Scale = v3(.7, 2, .2);
+    Player.Transform.Scale = v3(.3, 1, .1);
     State->Player = InsertItem(&Scene->Entites, &Player);
-
-    entity Ground = {};
-    Ground.EnityFlags = ENTITY_FLAG_COLLIDEABLE | ENTITY_FLAG_RENDERABLE;
-    InitTransform(&Ground.Transform);
-    Ground.Transform.Position = v3(0, -2, 0);
-    Ground.Transform.Scale = v3(100, 1, 100);
-    Ground.ModelIndex = State->CubeModel;
-    InsertItem(&Scene->Entites, &Ground);
-
-    entity House = {};
-    House.EnityFlags = ENTITY_FLAG_COLLIDEABLE | ENTITY_FLAG_RENDERABLE;
     
-    InitTransform(&House.Transform);
-    House.Transform.Scale = v3(5, 2.25, 5);
-    House.Transform.Position = v3(-10, 2.25, -10);
-    House.ModelIndex = State->HouseModel;
-    InsertItem(&Scene->Entites, &House);
-
-    InitTransform(&House.Transform);
-    House.Transform.Scale = v3(5, 2.25, 5);
-    House.Transform.Position = v3(10, 2.25, -10);
-    House.ModelIndex = State->HouseModel;
-    InsertItem(&Scene->Entites, &House);
-
-    InitTransform(&House.Transform);
-    House.Transform.Scale = v3(4, 2.1, 14);
-    House.Transform.Position = v3(10, 2.15, -50);
-    House.Transform.Rotation = glm::angleAxis(glm::radians(15.0f), glm::vec3(1, 0, 0));
-    House.ModelIndex = State->HouseModel;
-    InsertItem(&Scene->Entites, &House);
+    entity Ground = {};
+    Ground.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
+    InitTransform(&Ground.Transform);
+    Ground.ModelIndex = State->CubeModel;
+    v3 GroundStart = v3(10, 0, 10);
+    Ground.Transform.Scale = v3(METER(4), METER(1), METER(4));
+    for(int32 x = 0; x < 10; x++)
+    {
+        for(int32 y = 0; y < 10; y++)
+        {
+            Ground.Transform.Position = GroundStart - v3(x * METER(8), METER(0), y * METER(8));
+            InsertItem(&Scene->Entites, &Ground);
+        }
+    }
 }
 
 DLL_API Game_Update(GameUpdate)
@@ -56,31 +41,30 @@ DLL_API Game_Update(GameUpdate)
     if (!State->Initialized)
     {
         State->CubeModel = Api->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
-        State->SphereModel = Api->LoadLModel("../assetsProcessed/sphere.obj.lmodel");
         State->HouseModel = Api->LoadLModel("../assetsProcessed/cube.obj.lmodel");
-
+        
         // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Scene);
         State->World->Player.Position = PLAYER_START_POSITION;
         State->World->Player.Velocity = v3(0);
         Api->SetCollisionMesh(Scene->Entites, State->World);
-
+        
         State->Initialized = true;
     }
     if (State->GameReloaded)
     {
-        // InitializeEntities(State, Scene);
-        // State->World.Player.Position = PLAYER_START_POSITION;
-        // Api->SetCollisionMesh(Scene->Entites, &State->World);
+        InitializeEntities(State, Scene);
+        State->World->Player.Position = PLAYER_START_POSITION;
+        Api->SetCollisionMesh(Scene->Entites, State->World);
         State->GameReloaded = false;
     }
-
+    
     State->Player->Transform.Position = State->World->Player.Position;
-
+    
     glm::quat YawQ = glm::angleAxis(glm::radians(State->World->Player.YawDegrees),
                                     glm::vec3(0, 1, 0));
     State->Player->Transform.Rotation = YawQ;
-
+    
     Scene->ThirdPersonCamera.Target = State->Player->Transform.Position;
     Scene->ThirdPersonCamera.Yaw = State->World->Player.YawDegrees;
 }

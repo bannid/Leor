@@ -1,33 +1,33 @@
 glm::vec3 CollideAndSlide(  collision_packet* Cp,
-                            leor_primitive_triangle_list Triangles
-)
+                          leor_primitive_triangle_list Triangles
+                          )
 {
     Cp->E_Velocity = Cp->W_Velocity / Cp->EllipsoidSpace;
     Cp->E_Position = Cp->W_Position / Cp->EllipsoidSpace;
-
+    
     Cp->CollisionRecursionDepth = 0;
-
+    
     glm::vec3 FinalPosition = CollideWithWorld(Cp, Triangles);
-
+    
     FinalPosition = FinalPosition * Cp->EllipsoidSpace;
-
+    
     return FinalPosition;
 }
 
 glm::vec3 CollideWithWorld( collision_packet* Cp, 
-                            leor_primitive_triangle_list Triangles)
+                           leor_primitive_triangle_list Triangles)
 {
     f32 VeryCloseDistance = .005f;
-
+    
     if(Cp->CollisionRecursionDepth > 5)
     {
         return Cp->E_Position;
     }
-
+    
     Cp->E_NormalizedVelocity = glm::normalize(Cp->E_Velocity);
     Cp->FoundCollision = false;
     Cp->NearestDistance = 0.0f;
-
+    
     for(int32 Tricounter = 0; Tricounter < Triangles.Length; Tricounter++)
     {
         leor_primitive_triangle* Triangle = GetItemPointer(&Triangles, Tricounter);
@@ -37,18 +37,26 @@ glm::vec3 CollideWithWorld( collision_packet* Cp,
         P0 = P0 / Cp->EllipsoidSpace;
         P1 = P1 / Cp->EllipsoidSpace;
         P2 = P2 / Cp->EllipsoidSpace;
-
+        
         glm::vec3 TriangleNormal = glm::normalize(glm::cross(P1-P0, P2-P0));
         SphereCollidingWithTriangle(Cp, P0, P1, P2, TriangleNormal);
     }
     if(!Cp->FoundCollision)
     {
-        return Cp->E_Position + Cp->E_Velocity;
+        f32 Magnitude = glm::length(Cp->E_Velocity);
+        if(Magnitude > .01)
+        {
+            return Cp->E_Position + Cp->E_Velocity;
+        }
+        else
+        {
+            
+            return Cp->E_Position;}
     }
-
+    
     glm::vec3 DestinationPoint = Cp->E_Position + Cp->E_Velocity;
     glm::vec3 NewPosition = Cp->E_Position; // Just for initialization
-
+    
     // NOTE(Banni): Move the sphere toward the intersection point until it
     // almost touches the triangle plane
     if(Cp->NearestDistance >= VeryCloseDistance)
@@ -65,37 +73,37 @@ glm::vec3 CollideWithWorld( collision_packet* Cp,
     {
         NewPosition += glm::normalize(Cp->E_Position - Cp->IntersectionPoint) * VeryCloseDistance;
     }
-
+    
     glm::vec3 SlidePlaneOrigin = Cp->IntersectionPoint;
     glm::vec3 SlidePlaneNormal = glm::normalize(NewPosition - Cp->IntersectionPoint);
-
+    
     f32 x = SlidePlaneOrigin.x;
     f32 y = SlidePlaneOrigin.y;
     f32 z = SlidePlaneOrigin.z;
-
+    
     f32 A = SlidePlaneNormal.x;
     f32 B = SlidePlaneNormal.y;
     f32 C = SlidePlaneNormal.z;
-
+    
     f32 D = -((A*x) + (B*y) + (C*z));
     f32 PlaneConstant = D;
-
+    
     f32 SignedDistanceFromDestinationPointToSlidingPlane = glm::dot(DestinationPoint, SlidePlaneNormal) + PlaneConstant;
-
+    
     glm::vec3 NewDestinationPoint = DestinationPoint - SignedDistanceFromDestinationPointToSlidingPlane * SlidePlaneNormal;
-
+    
     glm::vec3 NewVelocityVector = NewDestinationPoint - Cp->IntersectionPoint;
-
+    
     // NOTE(Banni): If the velocity vector is really small, then just return
     if(glm::length(NewVelocityVector) < VeryCloseDistance)
     {
         return NewPosition;
     }
-
+    
     Cp->CollisionRecursionDepth++;
     Cp->E_Position = NewPosition;
     Cp->E_Velocity = NewVelocityVector;
-
+    
     return CollideWithWorld(Cp, Triangles);
 }
 
@@ -409,7 +417,7 @@ b32 GetLowestRoot(f32 a, f32 b, f32 c, f32 maxR, f32* root)
         *root = r2;
         return true;
     }
-
+    
     // No (valid) solutions
     return false;
 }

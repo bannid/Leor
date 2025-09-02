@@ -10,13 +10,5 @@ uniform sampler2D uDiffuseTexture;
 uniform bool uUseTexture;
 void main()
 {
-    vec3 LightDir = normalize(vec3(1,1,-1));
-    float Diffuse = clamp(.2, 1., dot(LightDir, FragNormal));
-    vec3 Colour = vec3(Diffuse);
-	FragColour = vec4(Colour, 1.0f);
-    if(uUseTexture)
-    {
-        vec3 TextureColour = texture(uDiffuseTexture, FragUv * 4.0f).xyz;
-        FragColour = vec4(TextureColour * Diffuse, 1.0f);
-    }
+    FragColour = vec4(FragNormal * .5 + .5, 1.0f);
 }
