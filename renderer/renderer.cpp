@@ -116,6 +116,20 @@ void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text, v4 Colou
     
 }
 
+f32 MeasureTextWidthDefault(renderer* Renderer, const char* Label)
+{
+    
+    char C;
+    f32 Result = 0.0f;
+    
+    while(C = *Label++)
+    {
+        font_character* Character = &Renderer->Fonts.Characters[(int32)C];
+        Result += (Character->Advance >> 6);
+    }
+    return(Result);
+}
+
 b32 RendererRunning(renderer *Renderer)
 {
     return !glfwWindowShouldClose(Renderer->Window);

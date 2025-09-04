@@ -24,6 +24,8 @@ DebugUI_Label(debug_ui* Ui, const char* Label)
 b32
 DebugUI_Button(debug_ui* Ui, const char* Label)
 {
+    f32 LabelWidth = MeasureTextWidthDefault(&GlobalRenderer, Label);
+    f32 LabelHeight = GlobalRenderer.Fonts.PixelHeight;
     u32 Id = Utils_HashStringFNV1a(Label);
     input* Input = Ui->Input;
     b32 Result = false;
@@ -46,8 +48,8 @@ DebugUI_Button(debug_ui* Ui, const char* Label)
         Ui->Active = Id;
     }
     
-    if(Input->Mouse.Position.x > Ui->Cursor.x && Input->Mouse.Position.x < Ui->Cursor.x + 100 &&
-       Input->Mouse.Position.y > Ui->Cursor.y && Input->Mouse.Position.y < Ui->Cursor.y + 20)
+    if(Input->Mouse.Position.x > Ui->Cursor.x && Input->Mouse.Position.x < Ui->Cursor.x + LabelWidth &&
+       Input->Mouse.Position.y > Ui->Cursor.y && Input->Mouse.Position.y < Ui->Cursor.y + LabelHeight)
     {
         Ui->Hot = Id;
     }

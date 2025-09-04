@@ -28,13 +28,14 @@
 global memory_arena                                    GlobalScractchArena;
 global memory_arena                                    GlobalModelsMemoryArena;
 global leor_model_list                                 GlobalModelsList;
-global timed_block_info_list                           GlobalFrameTimesDebugInfo;
 global renderer                                        GlobalRenderer;
 
 // NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
+#if defined(DEBUG)
+global timed_block_info_list                           GlobalFrameTimesDebugInfo;
 global debug_state GlobalDebugState;
 global debug_variable_list GlobalDebugVariableList;
-
+#endif
 
 // NOTE(Banni): Functions
 #include "transform.cpp"
@@ -43,7 +44,10 @@ global debug_variable_list GlobalDebugVariableList;
 #include "win32/win32_dll.cpp"
 #include "arena.cpp"
 #include "lists_utils.cpp"
-#include "lists_utils_internal.cpp"
+
+#if defined(DEBUG)
+#include "lists_utils_debug.cpp"
+#endif
 #include "glad.c"
 
 #include "utils.cpp"
@@ -60,7 +64,9 @@ global debug_variable_list GlobalDebugVariableList;
 #include "physics/collision/collision.cpp"
 #include "physics/physics.cpp"
 
+#if defined(DEBUG)
 #include "debugUI.cpp"
+#endif
 
 #include "engine_api.h"
 #include "game.h"
@@ -74,6 +80,7 @@ global debug_variable_list GlobalDebugVariableList;
 #define MAX_ENTITIES                                 200
 #define MAX_DEBUG_VARIABLES                          200
 
+#if defined(DEBUG)
 void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void* Pointer)
 {
     debug_variable Variable;
@@ -82,6 +89,7 @@ void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void*
     Variable.Pointer = Pointer;
     InsertItem(&GlobalDebugVariableList, &Variable);
 }
+#endif
 
 void GlfwCheckState(button_state *ButtonState,
                     button_state LastState,
@@ -191,6 +199,7 @@ InitiateGlobals(memory_arena *Arena)
     GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
 }
 
+#if defined(DEBUG)
 inline void
 InitiateGlobalDebugStuff(memory_arena *Arena)
 {
@@ -205,6 +214,7 @@ void PushDebugTimingInfo(timed_block_info Info)
 {
     InsertItem(&GlobalFrameTimesDebugInfo, &Info);
 }
+#endif
 
 int CALLBACK WinMain(HINSTANCE instance,
                      HINSTANCE prevInstance,
