@@ -41,6 +41,7 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     
     
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
+    Renderer->DefaultShader = LoadShaderFromFile("../shaders/main.vs.c", "../shaders/main.fs.c", ScratchArena); 
     Renderer->ScreenProjection = glm::ortho(0.0f, (f32)Width,
                                             0.0f, (f32)Height,
                                             0.0f, 10.0f);
@@ -136,11 +137,11 @@ b32 RendererRunning(renderer *Renderer)
 }
 
 void DrawScene(renderer *Renderer,
-               scene *Scene,
-               shader_program *Shader,
+               renderer_scene *Scene,
                glm::mat4 *Projection,
                leor_model_list *Models)
 {
+    shader_program *Shader = &Renderer->DefaultShader;
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -156,8 +157,7 @@ void DrawScene(renderer *Renderer,
                        glm::value_ptr(ViewMat));
     for (int32 j = 0; j < Scene->Entites.Length; j++)
     {
-        
-        entity *Entity = GetItemPointer(&Scene->Entites, j);
+        renderer_entity *Entity = GetItemPointer(&Scene->Entites, j);
         glm::mat4 ModelMat = TransformToMat4(&Entity->Transform);
         glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uModel"),
                            1,
@@ -202,4 +202,25 @@ void DrawCollisionMesh(renderer *Renderer,
                        glm::value_ptr(*ViewMat));
     glBindVertexArray(World->GPUHandle);
     glDrawArrays(GL_TRIANGLES, 0, World->CollisionMesh.Length * 3);
+}
+
+void
+DrawModel(renderer *Renderer,
+          shader_program *Shader,
+          u32 ModelHandle,
+          glm::mat4 *ViewMat,
+          glm::mat4 *Projection,
+          u32 NumberOfVertices)
+{
+    glUseProgram(Shader->ID);
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(*Projection));
+    glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uView"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(*ViewMat));
+    glBindVertexArray(ModelHandle);
+    glDrawArrays(GL_TRIANGLES, 0, NumberOfVertices);
 }

@@ -157,7 +157,7 @@ Set_Collision_Mesh(SetCollisionMesh)
     ResetList(&World->CollisionMesh);
     for (int32 i = 0; i < EntityList.Length; i++)
     {
-        entity Entity = *GetItemPointer(&EntityList, i);
+        renderer_entity Entity = *GetItemPointer(&EntityList, i);
         if (!(Entity.EnityFlags & ENTITY_FLAG_COLLIDEABLE))
             continue;
         
@@ -260,7 +260,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     GameState->Arena = GetMemoryArena(&MainMemoryArena, MEGABYTE(20));
     
     // NOTE(Banni): Initiate the default scene
-    scene DefaultScene = {};
+    renderer_scene DefaultScene = {};
     InitializeThirdPersonCamera(&DefaultScene.ThirdPersonCamera, 20.0f);
     InitList(&MainMemoryArena, &DefaultScene.Entites, MAX_ENTITIES);
     
@@ -297,7 +297,10 @@ int CALLBACK WinMain(HINSTANCE instance,
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
             // TODO(Banni): Temp code. Reload the shader.
-            MainShader = LoadShaderFromFile("../shaders/main.vs.c", "../shaders/main.fs.c", GlobalScractchArena);
+            GlobalRenderer.DefaultShader = LoadShaderFromFile("../shaders/main.vs.c",
+                                                              "../shaders/main.fs.c",
+                                                              GlobalScractchArena);
+            
             CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
                                                      "../shaders/collision_mesh.fs.c",
                                                      GlobalScractchArena);
@@ -319,23 +322,22 @@ int CALLBACK WinMain(HINSTANCE instance,
         // NOTE(Banni): Draw the actual scene
         DrawScene(&GlobalRenderer,
                   &DefaultScene,
-                  &MainShader,
                   &ProjectionMat,
                   &GlobalModelsList);
         
 #if defined(DEBUG)
-        // TODO(Banni): TEMP
         if (GlobalDebugState.DrawCollisionMesh)
         {
             // NOTE(Banni): Draw the collision mesh
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glLineWidth(2.0f);
             glm::mat4 CollisionViewMat = GetViewMatrix(&DefaultScene.ThirdPersonCamera);
-            DrawCollisionMesh(&GlobalRenderer,
-                              &CollisionMeshShader,
-                              GameState->World,
-                              &CollisionViewMat,
-                              &ProjectionMat);
+            DrawModel(&GlobalRenderer,
+                      &CollisionMeshShader,
+                      World.GPUHandle,
+                      &CollisionViewMat,
+                      &ProjectionMat,
+                      World.CollisionMesh.Length * 3);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         DrawDebugUI(&Ui, &Input);

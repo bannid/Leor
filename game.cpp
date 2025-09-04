@@ -8,10 +8,10 @@
 
 inline void
 InitializeEntities(game_state *State,
-                   scene *Scene)
+                   renderer_scene *Scene)
 {
     ResetList(&Scene->Entites);
-    entity Player = {};
+    renderer_entity Player = {};
     Player.EnityFlags = ENTITY_FLAG_RENDERABLE;
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
@@ -19,18 +19,19 @@ InitializeEntities(game_state *State,
     Player.Transform.Scale = v3(.3, 1, .1);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
-    entity Ground = {};
+    renderer_entity Ground = {};
     Ground.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
     InitTransform(&Ground.Transform);
     Ground.ModelIndex = State->GroundModel;
     v3 GroundStart = v3(10, 0, 10);
-    Ground.Transform.Scale = v3(METER(20), METER(1), METER(20));
+    Ground.Transform.Scale = v3(METER(5), METER(5), METER(5));
     for(int32 x = 0; x < 10; x++)
     {
         for(int32 y = 0; y < 10; y++)
         {
             Ground.Transform.Position = GroundStart - v3(x * Ground.Transform.Scale.x * 2.,
-                                                         METER(0), y * Ground.Transform.Scale.z * 2.);
+                                                         METER(0),
+                                                         y * Ground.Transform.Scale.z * 2.);
             InsertItem(&Scene->Entites, &Ground);
         }
     }

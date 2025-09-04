@@ -20,6 +20,7 @@ struct renderer
     const char*                            WindowTitle;
     font_type                              Fonts;
     shader_program                         FontShader;
+    shader_program                         DefaultShader;
     glm::mat4                              ScreenProjection;
     gl_model                               FontModel;
 };

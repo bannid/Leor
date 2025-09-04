@@ -20,7 +20,7 @@ struct game_state
     u32                                                 GroundModel;
     // NOTE(Banni): Simulation
     leor_physics_world*                                 World;
-    entity*                                             Player;
+    renderer_entity*                                    Player;
 };
 
 #endif //GAME_H

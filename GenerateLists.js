@@ -127,7 +127,7 @@ function WriteLists() {
         'debug_variable'    
     ];
     const sharedLists = [
-        'entity',
+        'renderer_entity',
         'leor_vertex',
         'leor_mesh',
         'leor_model',

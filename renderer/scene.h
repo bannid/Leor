@@ -7,25 +7,19 @@
 #define ENTITY_FLAG_RENDERABLE  0x04
 
 
-struct entity
+struct renderer_entity
 {
     transform Transform;
     u32 ModelIndex;
     u32 EnityFlags;
 };
 
-struct entity_list
-{
-    entity *Items;
-    u32 Size;
-    u32 Length;
-    b32 Initialized;
-};
+Declare_List(renderer_entity);
 
-struct scene
+struct renderer_scene
 {
     third_person_camera ThirdPersonCamera;
-    entity_list Entites;
+    renderer_entity_list Entites;
 };
 
 #endif // SCENE_H

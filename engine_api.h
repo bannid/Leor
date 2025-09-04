@@ -8,7 +8,7 @@
 typedef Load_L_Model(load_l_model);
 
 // NOTE(Banni): Sets the collision mesh from the Entites
-#define Set_Collision_Mesh(Name) void Name(entity_list EntityList,\
+#define Set_Collision_Mesh(Name) void Name(renderer_entity_list EntityList,\
 leor_physics_world* World)
 typedef Set_Collision_Mesh(set_collision_mesh);
 

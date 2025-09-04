@@ -62,7 +62,7 @@ struct input
 
 #define Game_Update(Name) void Name(engine_api* Api,\
 input* Input,\
-scene* Scene,\
+renderer_scene* Scene,\
 void* Memory)
 Game_Update(GameUpdateStub){}
 

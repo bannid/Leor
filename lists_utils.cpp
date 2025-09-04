@@ -1,49 +1,49 @@
 // Generated code
-void ResetList(entity_list* List)
+void ResetList(renderer_entity_list* List)
 {
     ASSERT_DEBUG(List->Initialized);
     List->Length = 0;
 }
     
-void InitList(memory_arena* arena, entity_list* List, u32 Size)
+void InitList(memory_arena* arena, renderer_entity_list* List, u32 Size)
 {
     ASSERT_DEBUG(!List->Initialized);
     List->Size = Size;
     List->Length = 0;
-    List->Items = (entity*)GetMemory(arena,Size * sizeof(entity));
+    List->Items = (renderer_entity*)GetMemory(arena,Size * sizeof(renderer_entity));
     List->Initialized = true;
 }
     
-entity* InsertItem(entity_list* List, entity* Item)
+renderer_entity* InsertItem(renderer_entity_list* List, renderer_entity* Item)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
-    entity* ptr = List->Items + List->Length++;
+    renderer_entity* ptr = List->Items + List->Length++;
     *ptr = *Item;
     return ptr;
 }
     
-entity* GetItemPointer(entity_list* List,u32 Index)
+renderer_entity* GetItemPointer(renderer_entity_list* List,u32 Index)
 {
     ASSERT_DEBUG(Index < List->Length);
-    entity* ptr = List->Items + Index;
+    renderer_entity* ptr = List->Items + Index;
     return ptr;
 }
     
-entity GetItem(entity_list* List,u32 Index)
+renderer_entity GetItem(renderer_entity_list* List,u32 Index)
 {
     ASSERT_DEBUG(Index < List->Length);
-    entity* ptr = List->Items + Index;
+    renderer_entity* ptr = List->Items + Index;
     return *ptr;
 }
     
-void DeInitList(entity_list* List)
+void DeInitList(renderer_entity_list* List)
 {
     ASSERT_DEBUG(List->Initialized);
     List->Initialized = false;
 }
     
-void InsertItemFront(entity_list* List, entity* Item)
+void InsertItemFront(renderer_entity_list* List, renderer_entity* Item)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
@@ -56,7 +56,7 @@ void InsertItemFront(entity_list* List, entity* Item)
     List->Length++;
 }
     
-void PopItemFront(entity_list* List)
+void PopItemFront(renderer_entity_list* List)
 {
     ASSERT_DEBUG(List->Initialized);
     ASSERT_DEBUG(List->Length < List->Size);
