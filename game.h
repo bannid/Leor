@@ -17,6 +17,7 @@ struct game_state
     
     u32                                                 CubeModel;
     u32                                                 HouseModel;
+    u32                                                 GroundModel;
     // NOTE(Banni): Simulation
     leor_physics_world*                                 World;
     entity*                                             Player;

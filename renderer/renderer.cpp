@@ -48,7 +48,7 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     return true;
 }
 
-void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text)
+void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text, v4 Colour)
 {
     ASSERT_DEBUG(Renderer->FontShader.Valid);
     
@@ -63,7 +63,6 @@ void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text)
                        glm::value_ptr(Renderer->ScreenProjection));
     
     glUniform1i(glGetUniformLocation(Renderer->FontShader.ID, "uTexture"), 0);
-    glm::vec4 Colour = glm::vec4(1.0f);
     glUniform4fv(Renderer->FontShader.ColourLocation,
                  1,
                  (f32*)&Colour);

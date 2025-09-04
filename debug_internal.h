@@ -34,7 +34,7 @@ struct timed_block
 struct debug_state
 {
     b32 DrawCollisionMesh;
-    b32 DrawTimeUtils;
+    b32 DrawDebugInfo;
 };
 
 // TODO(Banni): Maybe we can move this to debug.h?
@@ -43,6 +43,7 @@ enum debug_variable_type
     Debug_Variable_Type_Int,
     Debug_Variable_Type_Float,
     Debug_Variable_Type_Bool,
+    Debug_Variable_Type_V2,
     Debug_Variable_Type_V3,
     Debug_Variable_Type_V4
 };

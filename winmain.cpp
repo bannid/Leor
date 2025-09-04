@@ -17,6 +17,7 @@
 #include "debug_internal.h"
 #include "transform.h"
 #include "common_layer.h"
+#include "debug_ui.h"
 #include "arena.h"
 #include "win32/win32.h"
 #include "physics/physics.h"
@@ -29,6 +30,7 @@ global memory_arena                                    GlobalModelsMemoryArena;
 global leor_model_list                                 GlobalModelsList;
 global timed_block_info_list                           GlobalFrameTimesDebugInfo;
 global renderer                                        GlobalRenderer;
+
 // NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
 global debug_state GlobalDebugState;
 global debug_variable_list GlobalDebugVariableList;
@@ -63,8 +65,8 @@ global debug_variable_list GlobalDebugVariableList;
 #include "engine_api.h"
 #include "game.h"
 
-#define WIDTH 1920
-#define HEIGHT 1080
+#define WIDTH 800
+#define HEIGHT 800
 #define ASPECT_RATIO (f32) WIDTH / (f32)HEIGHT
 
 #define MAX_TRIANGLES_IN_COLLISION_MESH              10000
@@ -101,7 +103,7 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
     real64 y;
     glfwGetCursorPos(Window, &x, &y);
     // TODO(Banni): Get the window height from the renderer
-    // y = GlobalEngine.Window.Height - y;
+    y = GlobalRenderer.Height - y;
     Input->Mouse.Position = v2((f32)x, (f32)y);
     GlfwCheckState(&Input->Mouse.Left,
                    LastFrameMouse.Left,
@@ -270,6 +272,11 @@ int CALLBACK WinMain(HINSTANCE instance,
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
     f32 LastTime = CurrentTime;
+#if defined(DEBUG)
+    debug_ui Ui;
+    Ui.Flow = Debug_Ui_Flow_Vertical;
+    Ui.Input = &Input;
+#endif
     
     while (1)
     {
@@ -288,6 +295,7 @@ int CALLBACK WinMain(HINSTANCE instance,
         }
         
         GlfwProcessInput(GlobalRenderer.Window, &Input);
+        DEBUG_PUSH_VARIABLE("Mouse position", Debug_Variable_Type_V2, &Input.Mouse.Position);
         CurrentTime = glfwGetTime();
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
@@ -307,7 +315,7 @@ int CALLBACK WinMain(HINSTANCE instance,
         
 #if defined(DEBUG)
         // TODO(Banni): TEMP
-        if (GlobalDebugState.DrawCollisionMesh || true)
+        if (GlobalDebugState.DrawCollisionMesh)
         {
             // NOTE(Banni): Draw the collision mesh
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -320,7 +328,7 @@ int CALLBACK WinMain(HINSTANCE instance,
                               &ProjectionMat);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-        DrawDebugUI();
+        DrawDebugUI(&Ui, &Input);
 #endif
         glfwSwapBuffers(GlobalRenderer.Window);
         glfwPollEvents();

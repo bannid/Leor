@@ -22,14 +22,15 @@ InitializeEntities(game_state *State,
     entity Ground = {};
     Ground.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
     InitTransform(&Ground.Transform);
-    Ground.ModelIndex = State->CubeModel;
+    Ground.ModelIndex = State->GroundModel;
     v3 GroundStart = v3(10, 0, 10);
-    Ground.Transform.Scale = v3(METER(4), METER(1), METER(4));
+    Ground.Transform.Scale = v3(METER(20), METER(1), METER(20));
     for(int32 x = 0; x < 10; x++)
     {
         for(int32 y = 0; y < 10; y++)
         {
-            Ground.Transform.Position = GroundStart - v3(x * METER(8), METER(0), y * METER(8));
+            Ground.Transform.Position = GroundStart - v3(x * Ground.Transform.Scale.x * 2.,
+                                                         METER(0), y * Ground.Transform.Scale.z * 2.);
             InsertItem(&Scene->Entites, &Ground);
         }
     }
@@ -42,7 +43,7 @@ DLL_API Game_Update(GameUpdate)
     {
         State->CubeModel = Api->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
         State->HouseModel = Api->LoadLModel("../assetsProcessed/cube.obj.lmodel");
-        
+        State->GroundModel = Api->LoadLModel("../assetsProcessed/plane.obj.lmodel");
         // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Scene);
         State->World->Player.Position = PLAYER_START_POSITION;

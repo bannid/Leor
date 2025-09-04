@@ -32,7 +32,7 @@ Utils_ConcatenateStrings(char* First, char* Second, char* Buffer, u32 BufferSize
     u32 SecondStringLength = Utils_StringLength(Second);
     
     u32 TotalLength = 0;
-
+    
     for(int32 i = 0; i < FirstStringLength; i++)
     {
         if(TotalLength >= BufferSize - 1) break;
@@ -44,4 +44,30 @@ Utils_ConcatenateStrings(char* First, char* Second, char* Buffer, u32 BufferSize
         Buffer[TotalLength++] = *(Second + i);
     }
     Buffer[TotalLength] = 0;
+}
+
+u32
+Utils_HashFNV1a(const void* data, size_t size, uint32_t seed = 0x811C9DC5u)
+{
+    const uint8_t* bytes = static_cast<const uint8_t*>(data);
+    uint32_t hash = seed;
+    for (size_t i = 0; i < size; ++i)
+    {
+        hash ^= bytes[i];
+        hash *= 0x01000193u; // FNV prime
+    }
+    return hash;
+}
+
+// Helper for strings
+u32
+Utils_HashStringFNV1a(const char* str, uint32_t seed = 0x811C9DC5u)
+{
+    uint32_t hash = seed;
+    while (*str)
+    {
+        hash ^= static_cast<uint8_t>(*str++);
+        hash *= 0x01000193u;
+    }
+    return hash;
 }

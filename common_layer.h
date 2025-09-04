@@ -41,7 +41,6 @@ struct button_state
 struct mouse_input
 {
     v2                                               Position;
-    v2                                               Mapped;
     button_state                                     Left;
     button_state                                     Right;
 };
