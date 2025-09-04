@@ -33,7 +33,7 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // NOTE(Banni): Load the fonts
-    Renderer->Fonts = FreeTypeLoadFontsFromFile("../assets/arial.ttf", 16.0f, ScratchArena);
+    Renderer->Fonts = FreeTypeLoadFontsFromFile("../assets/fonts/arial.ttf", 16.0f, ScratchArena);
     
     // NOTE(Banni): Generated from https://tools.irvantaufik.me/newline-to-escape/
     const char* VsSource = "#version 330\n\nlayout (location = 0) in vec3 aPos;\nlayout (location = 1) in vec2 aTex;\n\nuniform mat4 uProjection;\n\nout vec2 fTex;\n\nvoid main()\n{\n    gl_Position = uProjection * vec4(aPos, 1.0f);\n    fTex = aTex;\n}";
@@ -41,7 +41,9 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     
     
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
-    Renderer->DefaultShader = LoadShaderFromFile("../shaders/main.vs.c", "../shaders/main.fs.c", ScratchArena); 
+    Renderer->DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
+                                                 "../assets/shaders/main.fs.c",
+                                                 ScratchArena); 
     Renderer->ScreenProjection = glm::ortho(0.0f, (f32)Width,
                                             0.0f, (f32)Height,
                                             0.0f, 10.0f);
@@ -167,18 +169,6 @@ void DrawScene(renderer *Renderer,
         for (int32 i = 0; i < Model->Meshes.Length; i++)
         {
             leor_mesh *Mesh = GetItemPointer(&Model->Meshes, i);
-            
-            // NOTE(Banni): Attach the texture if any
-            if (*Mesh->DiffuseTexture != '\0')
-            {
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, Mesh->DiffuseTextureID);
-                SetUniformBool(Shader->ID, true, "uUseTexture");
-            }
-            else
-            {
-                SetUniformBool(Shader->ID, false, "uUseTexture");
-            }
             glBindVertexArray(Mesh->GPUId);
             glDrawArrays(GL_TRIANGLES, 0, Mesh->Vertices.Length);
         }

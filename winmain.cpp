@@ -268,11 +268,8 @@ int CALLBACK WinMain(HINSTANCE instance,
                                                ASPECT_RATIO,
                                                .1f,
                                                500.0f);
-    shader_program MainShader = LoadShaderFromFile("../shaders/main.vs.c",
-                                                   "../shaders/main.fs.c",
-                                                   GlobalScractchArena);
-    shader_program CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
-                                                            "../shaders/collision_mesh.fs.c",
+    shader_program CollisionMeshShader = LoadShaderFromFile("../assets/shaders/collision_mesh.vs.c",
+                                                            "../assets/shaders/collision_mesh.fs.c",
                                                             GlobalScractchArena);
     
     engine_api Api;
@@ -297,12 +294,12 @@ int CALLBACK WinMain(HINSTANCE instance,
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
             // TODO(Banni): Temp code. Reload the shader.
-            GlobalRenderer.DefaultShader = LoadShaderFromFile("../shaders/main.vs.c",
-                                                              "../shaders/main.fs.c",
+            GlobalRenderer.DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
+                                                              "../assets/shaders/main.fs.c",
                                                               GlobalScractchArena);
             
-            CollisionMeshShader = LoadShaderFromFile("../shaders/collision_mesh.vs.c",
-                                                     "../shaders/collision_mesh.fs.c",
+            CollisionMeshShader = LoadShaderFromFile("../assets/shaders/collision_mesh.vs.c",
+                                                     "../assets/shaders/collision_mesh.fs.c",
                                                      GlobalScractchArena);
             GameState->GameReloaded = true;
         }
