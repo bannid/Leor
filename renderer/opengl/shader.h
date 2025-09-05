@@ -13,4 +13,6 @@ struct shader_program
     u32                 ColourLocation;
 };
 
+DECLARE_LIST(shader_program);
+
 #endif //SHADER_H

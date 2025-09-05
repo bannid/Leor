@@ -15,14 +15,14 @@ InitializeEntities(game_state *State,
     Player.EnityFlags = ENTITY_FLAG_RENDERABLE;
     InitTransform(&Player.Transform);
     Player.Transform.Position = PLAYER_START_POSITION;
-    Player.ModelIndex = State->CubeModel;
+    Player.ModelHandle = State->CubeModel;
     Player.Transform.Scale = v3(.3, 1, .1);
     State->Player = InsertItem(&Scene->Entites, &Player);
     
     renderer_entity Ground = {};
     Ground.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
     InitTransform(&Ground.Transform);
-    Ground.ModelIndex = State->GroundModel;
+    Ground.ModelHandle = State->GroundModel;
     v3 GroundStart = v3(10, 0, 10);
     Ground.Transform.Scale = v3(METER(5), METER(5), METER(5));
     for(int32 x = 0; x < 10; x++)

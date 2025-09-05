@@ -124,8 +124,12 @@ function GenerateSource(list)
 function WriteLists() {
     const debugLists = [
         'timed_block_info',
-        'debug_variable'    
+        'debug_variable'
+		
     ];
+	const internalLists = [
+		'shader_program'
+	];
     const sharedLists = [
         'renderer_entity',
         'leor_vertex',
@@ -138,8 +142,10 @@ function WriteLists() {
     ];
     let sharedListsSource = GenerateSource(sharedLists);
     let debugListsSource = GenerateSource(debugLists);
+	let internalListsSource = GenerateSource(internalLists);
 
-    fs.writeFileSync('lists_utils_debug.cpp', debugListsSource);
-    fs.writeFileSync('lists_utils.cpp', sharedListsSource);
+    fs.writeFileSync('../lists_utils_debug.cpp', debugListsSource);
+    fs.writeFileSync('../lists_utils.cpp', sharedListsSource);
+	fs.writeFileSync('../lists_utils_internal.cpp', internalListsSource);
 }
 WriteLists();

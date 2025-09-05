@@ -43,7 +43,8 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
     Renderer->DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
                                                  "../assets/shaders/main.fs.c",
-                                                 ScratchArena); 
+                                                 ScratchArena);
+    Renderer->DefaultTexture = LoadTexture("../assets/textures/checker.png", 4, false);
     Renderer->ScreenProjection = glm::ortho(0.0f, (f32)Width,
                                             0.0f, (f32)Height,
                                             0.0f, 10.0f);
@@ -149,6 +150,9 @@ void DrawScene(renderer *Renderer,
     
     glm::mat4 ViewMat = GetViewMatrix(&Scene->ThirdPersonCamera);
     glUseProgram(Shader->ID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Renderer->DefaultTexture);
+    glUniform1i(glGetUniformLocation(Shader->ID, "uTexture"), 0);
     glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),
                        1,
                        GL_FALSE,
@@ -165,7 +169,7 @@ void DrawScene(renderer *Renderer,
                            1,
                            GL_FALSE,
                            glm::value_ptr(ModelMat));
-        leor_model *Model = GetItemPointer(Models, Entity->ModelIndex);
+        leor_model *Model = GetItemPointer(Models, Entity->ModelHandle);
         for (int32 i = 0; i < Model->Meshes.Length; i++)
         {
             leor_mesh *Mesh = GetItemPointer(&Model->Meshes, i);

@@ -11,6 +11,7 @@
 #include "model.h"
 #include "scene.h"
 #include "camera.h"
+#include "material.h"
 
 struct renderer
 {
@@ -21,6 +22,7 @@ struct renderer
     font_type                              Fonts;
     shader_program                         FontShader;
     shader_program                         DefaultShader;
+    u32                                    DefaultTexture;
     glm::mat4                              ScreenProjection;
     gl_model                               FontModel;
 };

@@ -11,7 +11,7 @@ struct leor_vertex
     v3 Normal;
     v2 TextureCoords;
 };
-Declare_List(leor_vertex);
+DECLARE_LIST(leor_vertex);
 
 // NOTE(Banni): Vertices are stored in order in memory
 struct leor_mesh
@@ -22,13 +22,13 @@ struct leor_mesh
     char DiffuseTexture[LEOR_MODEL_TEXTURE_MAX_LENGTH];
     u32 DiffuseTextureID;
 };
-Declare_List(leor_mesh);
+DECLARE_LIST(leor_mesh);
 
 struct leor_model
 {
     leor_mesh_list Meshes;
     b32 LoadedToGPU;
 };
-Declare_List(leor_model);
+DECLARE_LIST(leor_model);
 
 #endif //MODEL_H

@@ -1,6 +1,5 @@
-glm::vec3 CollideAndSlide(  collision_packet* Cp,
-                          leor_primitive_triangle_list Triangles
-                          )
+glm::vec3 CollideAndSlide(collision_packet* Cp,
+                          leor_primitive_triangle_list Triangles)
 {
     Cp->E_Velocity = Cp->W_Velocity / Cp->EllipsoidSpace;
     Cp->E_Position = Cp->W_Position / Cp->EllipsoidSpace;
@@ -14,7 +13,7 @@ glm::vec3 CollideAndSlide(  collision_packet* Cp,
     return FinalPosition;
 }
 
-glm::vec3 CollideWithWorld( collision_packet* Cp, 
+glm::vec3 CollideWithWorld(collision_packet* Cp, 
                            leor_primitive_triangle_list Triangles)
 {
     f32 VeryCloseDistance = .005f;

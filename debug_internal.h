@@ -8,7 +8,7 @@ struct timed_block_info
     const char* Name;
     f32 TimeTook;
 };
-Declare_List(timed_block_info);
+DECLARE_LIST(timed_block_info);
 
 extern void PushDebugTimingInfo(timed_block_info);
 
@@ -21,7 +21,8 @@ struct timed_block
         this->BlockName = BlockName;
         this->StartTime = glfwGetTime();
     }
-    ~timed_block()
+    
+    void End()
     {
         f32 TimeElapsed = glfwGetTime() - this->StartTime;
         timed_block_info T;
@@ -30,6 +31,27 @@ struct timed_block
         PushDebugTimingInfo(T);
     }
 };
+
+
+struct timed_function
+{
+    f32 StartTime;
+    const char* FunctionName;
+    timed_function(const char* FunctionName)
+    {
+        this->FunctionName = FunctionName;
+        this->StartTime = glfwGetTime();
+    }
+    ~timed_function()
+    {
+        f32 TimeElapsed = glfwGetTime() - this->StartTime;
+        timed_block_info T;
+        T.TimeTook = TimeElapsed * 1000.0f;
+        T.Name = this->FunctionName;
+        PushDebugTimingInfo(T);
+    }
+};
+
 
 struct debug_state
 {
@@ -40,7 +62,7 @@ struct debug_state
 // TODO(Banni): Maybe we can move this to debug.h?
 enum debug_variable_type
 {
-    Debug_Variable_Type_Int,
+    Debug_Variable_Type_Int32,
     Debug_Variable_Type_Float,
     Debug_Variable_Type_Bool,
     Debug_Variable_Type_V2,
@@ -55,15 +77,23 @@ struct debug_variable
     void* Pointer;
 };
 
-Declare_List(debug_variable);
+DECLARE_LIST(debug_variable);
 
 void DebugPushVariableToGlobal(const char* Name, debug_variable_type Type, void* Pointer);
 
-#define TIMED_BLOCK(x) timed_block T##__FUNCTION____FILE_____LINE__(x)
+#define TIMED_FUNCTION() timed_function T##__FUNCTION____FILE_____LINE__(##__FUNCTION__)
+
+#define TIMED_BLOCK_START(name) timed_block T##name(#name)
+#define TIMED_BLOCK_END(name) T##name.End()
+
+
 #define DEBUG_PUSH_VARIABLE(Name, Type, Ptr) DebugPushVariableToGlobal(Name,Type,Ptr)
 #else 
-#define TIMED_BLOCK(x)
+
+#define TIMED_FUNCTION()
 #define DEBUG_PUSH_VARIABLE(Name, Type, Ptr)
+#define TIMED_BLOCK_START(name) 
+#define TIMED_BLOCK_END(name)
 #endif
 
 #endif

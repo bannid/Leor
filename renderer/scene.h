@@ -6,15 +6,15 @@
 #define ENTITY_FLAG_COLLIDEABLE 0x02
 #define ENTITY_FLAG_RENDERABLE  0x04
 
-
 struct renderer_entity
 {
     transform Transform;
-    u32 ModelIndex;
+    u32 ModelHandle;
+    u32 MaterialHandle;
     u32 EnityFlags;
 };
 
-Declare_List(renderer_entity);
+DECLARE_LIST(renderer_entity);
 
 struct renderer_scene
 {

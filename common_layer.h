@@ -25,6 +25,7 @@
 #include "renderer/model.h"
 #include "renderer/camera.h"
 #include "renderer/scene.h"
+#include "renderer/material.h"
 #include "arena.h"
 #include "engine_api.h"
 
@@ -51,6 +52,7 @@ struct keyboard_input
     button_state                                     Down;
     button_state                                     Left;
     button_state                                     Right;
+    button_state                                     Space;
 };
 
 struct input

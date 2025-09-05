@@ -13,7 +13,7 @@
 #define PI 3.141592
 
 #define ARRAY_COUNT(x) sizeof(x) / sizeof(x[0])
-#define Declare_List(type)\
+#define DECLARE_LIST(type)\
 struct type##_list {\
 u32 Size;\
 u32 Length;\

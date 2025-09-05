@@ -2,7 +2,7 @@
 
 void UpdateWorld(leor_physics_world *World, input *Input)
 {
-    TIMED_BLOCK("Update world");
+    TIMED_FUNCTION();
     DEBUG_PUSH_VARIABLE("Player Position", Debug_Variable_Type_V3, &World->Player.Position);
     DEBUG_PUSH_VARIABLE("Player Velocity", Debug_Variable_Type_V3, &World->Player.Velocity);
     World->dtAccumulator += Input->dt;
@@ -27,6 +27,11 @@ void UpdateWorld(leor_physics_world *World, input *Input)
         {
             World->Player.YawDegrees += 50.0f * SIMULATION_FREQUENCY;
         }
+        if(Input->Keyboard.Space.IsDown && World->Player.Position.y <= 1.5)
+        {
+            World->Player.Velocity = v3(0, 40, 0);
+        }
+        
         leor_physics_player *Player = &World->Player;
         glm::quat Q = glm::angleAxis(glm::radians(Player->YawDegrees),
                                      glm::vec3(0, 1, 0));

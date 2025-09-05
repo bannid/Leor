@@ -99,11 +99,19 @@ DrawDebugUI(debug_ui* Ui, input* Input)
                     snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
                              "%s: (%.2f,%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y, Pointer->z);
                 }break;
+                
                 case Debug_Variable_Type_V2:
                 {
                     v2* Pointer = (v2*)Variable->Pointer;
                     snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
                              "%s: (%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y);
+                }break;
+                
+                case Debug_Variable_Type_Int32:
+                {
+                    int32 *Pointer = (int32*)Variable->Pointer;
+                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
+                             "%s: %d", Variable->Name, *Pointer);
                 }break;
             }
             DebugUI_Label(Ui, (const char*)BufferToPrintStuff);

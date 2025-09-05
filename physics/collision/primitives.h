@@ -8,6 +8,6 @@ struct leor_primitive_triangle
     v3 V3;
 };
 
-Declare_List(leor_primitive_triangle);
+DECLARE_LIST(leor_primitive_triangle);
 
 #endif

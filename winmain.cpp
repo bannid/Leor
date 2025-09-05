@@ -28,6 +28,7 @@
 global memory_arena                                    GlobalScractchArena;
 global memory_arena                                    GlobalModelsMemoryArena;
 global leor_model_list                                 GlobalModelsList;
+global shader_program_list                             GlobalShadersList;
 global renderer                                        GlobalRenderer;
 
 // NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
@@ -44,10 +45,12 @@ global debug_variable_list GlobalDebugVariableList;
 #include "win32/win32_dll.cpp"
 #include "arena.cpp"
 #include "lists_utils.cpp"
+#include "lists_utils_internal.cpp"
 
 #if defined(DEBUG)
 #include "lists_utils_debug.cpp"
 #endif
+
 #include "glad.c"
 
 #include "utils.cpp"
@@ -71,12 +74,13 @@ global debug_variable_list GlobalDebugVariableList;
 #include "engine_api.h"
 #include "game.h"
 
-#define WIDTH 800
-#define HEIGHT 800
+#define WIDTH 1920
+#define HEIGHT 1080
 #define ASPECT_RATIO (f32) WIDTH / (f32)HEIGHT
 
 #define MAX_TRIANGLES_IN_COLLISION_MESH              10000
 #define MAX_MODELS                                   200
+#define MAX_SHADERS                                  200
 #define MAX_ENTITIES                                 200
 #define MAX_DEBUG_VARIABLES                          200
 
@@ -132,13 +136,16 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
     GlfwCheckState(&Input->Keyboard.Left,
                    LastFrameKeyboard.Left,
                    glfwGetKey(Window, GLFW_KEY_LEFT));
+    GlfwCheckState(&Input->Keyboard.Space,
+                   LastFrameKeyboard.Space,
+                   glfwGetKey(Window, GLFW_KEY_SPACE));
     
     LastFrameMouse = Input->Mouse;
     LastFrameKeyboard = Input->Keyboard;
 }
 
 // NOTE(Banni): Platform API implementation
-Load_L_Model(LoadLModelAndUploadToGPU)
+API_LOAD_L_MODEL(LoadLModelAndUploadToGPU)
 {
     leor_model Model = {};
     LoadLModel(Path,
@@ -152,7 +159,7 @@ Load_L_Model(LoadLModelAndUploadToGPU)
 
 // NOTE(Banni): Platform API implementation
 // TODO(Banni): Right now we dont have any way of distinguising b/w static and moving entities.
-Set_Collision_Mesh(SetCollisionMesh)
+API_SET_COLLISION_MESH(SetCollisionMesh)
 {
     ResetList(&World->CollisionMesh);
     for (int32 i = 0; i < EntityList.Length; i++)
@@ -160,11 +167,8 @@ Set_Collision_Mesh(SetCollisionMesh)
         renderer_entity Entity = *GetItemPointer(&EntityList, i);
         if (!(Entity.EnityFlags & ENTITY_FLAG_COLLIDEABLE))
             continue;
-        
-        // NOTE(Banni): Make the collsion mesh little bit bigger then the actual models
-        Entity.Transform.Scale *= 1.001;
         mat4 EntityTransform = TransformToMat4(&Entity.Transform);
-        leor_model *Model = GetItemPointer(&GlobalModelsList, Entity.ModelIndex);
+        leor_model *Model = GetItemPointer(&GlobalModelsList, Entity.ModelHandle);
         for (int32 j = 0; j < Model->Meshes.Length; j++)
         {
             leor_mesh *Mesh = GetItemPointer(&Model->Meshes, j);
@@ -195,6 +199,10 @@ InitiateGlobals(memory_arena *Arena)
 {
     GlobalModelsList = {};
     InitList(Arena, &GlobalModelsList, MAX_MODELS);
+    
+    GlobalShadersList = {};
+    InitList(Arena, &GlobalShadersList, MAX_SHADERS);
+    
     GlobalScractchArena = GetMemoryArena(Arena, MEGABYTE(10));
     GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
 }
@@ -279,6 +287,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
     f32 LastTime = CurrentTime;
+    
 #if defined(DEBUG)
     debug_ui Ui;
     Ui.Flow = Debug_Ui_Flow_Vertical;
@@ -287,7 +296,6 @@ int CALLBACK WinMain(HINSTANCE instance,
     
     while (1)
     {
-        TIMED_BLOCK("Render Loop");
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
         if (CompareFileTime(&NewDllWriteTime, &GameCode.LastWriteTime) != 0)
         {
@@ -304,16 +312,22 @@ int CALLBACK WinMain(HINSTANCE instance,
             GameState->GameReloaded = true;
         }
         
+        TIMED_BLOCK_START(ProcessInput);
         GlfwProcessInput(GlobalRenderer.Window, &Input);
+        TIMED_BLOCK_END(ProcessInput);
+        
         DEBUG_PUSH_VARIABLE("Mouse position", Debug_Variable_Type_V2, &Input.Mouse.Position);
         CurrentTime = glfwGetTime();
         Input.dt = CurrentTime - LastTime;
         LastTime = CurrentTime;
         
+        TIMED_BLOCK_START(GameDLL);
         GameCode.GameUpdate(&Api,
                             &Input,
                             &DefaultScene,
                             (void *)GameState);
+        TIMED_BLOCK_END(GameDLL);
+        
         UpdateWorld(&World, &Input);
         
         // NOTE(Banni): Draw the actual scene
