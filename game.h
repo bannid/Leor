@@ -18,6 +18,10 @@ struct game_state
     u32                                                 CubeModel;
     u32                                                 HouseModel;
     u32                                                 GroundModel;
+    
+    // TODO(Banni): Temp shader
+    u32                                                 ColourShader;
+    u32                                                 RedMaterial;
     // NOTE(Banni): Simulation
     leor_physics_world*                                 World;
     renderer_entity*                                    Player;

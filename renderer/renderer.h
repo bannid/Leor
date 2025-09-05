@@ -13,8 +13,9 @@
 #include "camera.h"
 #include "material.h"
 
-#define RENDERER_MAX_SHADERS 200
-#define RENDERER_DEFAULT_FONT_SIZE 20
+#define RENDERER_MAX_SHADERS                        200
+#define RENDERER_DEFAULT_FONT_SIZE                  20
+#define RENDERER_MAX_MATERIALS                      200
 
 struct renderer
 {
@@ -28,6 +29,7 @@ struct renderer
     glm::mat4                              ScreenProjection;
     gl_model                               FontModel;
     shader_program_list                    Shaders;
+    renderer_material_list                 Materials;
 };
 
 #endif //RENDERER_H

@@ -44,13 +44,20 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     
     // NOTE(Banni): Initialize the lists
     Renderer->Shaders = {};
+    Renderer->Materials = {};
     InitList(Arena, &Renderer->Shaders, RENDERER_MAX_SHADERS);
+    InitList(Arena, &Renderer->Materials, RENDERER_MAX_MATERIALS);
     
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
     shader_program DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
                                                       "../assets/shaders/main.fs.c",
                                                       ScratchArena);
     InsertItem(&Renderer->Shaders, &DefaultShader);
+    
+    renderer_material DefaultMaterial = {};
+    InsertItem(&Renderer->Materials, &DefaultMaterial);
+    
+    
     Renderer->DefaultTexture = LoadTexture("../assets/textures/checker.png", 4, false);
     Renderer->ScreenProjection = glm::ortho(0.0f, (f32)Width,
                                             0.0f, (f32)Height,
@@ -146,16 +153,17 @@ b32 RendererRunning(renderer *Renderer)
     return !glfwWindowShouldClose(Renderer->Window);
 }
 
-void DrawScene(renderer *Renderer,
-               renderer_scene *Scene,
-               glm::mat4 *Projection,
-               leor_model_list *Models)
+void 
+DrawScene(renderer *Renderer,
+          renderer_scene *Scene,
+          glm::mat4 *Projection,
+          leor_model_list *Models)
 {
-    // NOTE(Banni): The first shader is the default shader
-    shader_program *Shader = GetItemPointer(&Renderer->Shaders, 0);
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    // NOTE(Banni): The first shader is the default shader
+    shader_program *Shader = GetItemPointer(&Renderer->Shaders, 0);
     glm::mat4 ViewMat = GetViewMatrix(&Scene->ThirdPersonCamera);
     glUseProgram(Shader->ID);
     glActiveTexture(GL_TEXTURE0);
@@ -169,14 +177,54 @@ void DrawScene(renderer *Renderer,
                        1,
                        GL_FALSE,
                        glm::value_ptr(ViewMat));
+    
+    u32 MaterialHandle = 0;
     for (int32 j = 0; j < Scene->Entites.Length; j++)
     {
         renderer_entity *Entity = GetItemPointer(&Scene->Entites, j);
         glm::mat4 ModelMat = TransformToMat4(&Entity->Transform);
-        glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uModel"),
-                           1,
-                           GL_FALSE,
-                           glm::value_ptr(ModelMat));
+        
+        // NOTE(Banni): If this entity is not using the default material
+        if(Entity->MaterialHandle > 0)
+        {
+            renderer_material *Material = GetItemPointer(&Renderer->Materials, Entity->MaterialHandle);
+            shader_program* EntityShader = GetItemPointer(&Renderer->Shaders, Material->ShaderHandle);
+            glUseProgram(EntityShader->ID);
+            
+            // NOTE(Banni): Small performance improvement. If we updated this material iteration,
+            // then no need to update the uniforms again.
+            if(MaterialHandle != Entity->MaterialHandle)
+            {
+                glUniformMatrix4fv(glGetUniformLocation(EntityShader->ID, "uProjection"),
+                                   1,
+                                   GL_FALSE,
+                                   glm::value_ptr(*Projection));
+                glUniformMatrix4fv(glGetUniformLocation(EntityShader->ID, "uView"),
+                                   1,
+                                   GL_FALSE,
+                                   glm::value_ptr(ViewMat));
+                
+                glUniform4fv(glGetUniformLocation(EntityShader->ID, "uColour"),
+                             1,
+                             (f32*)&Material->Colour);
+            }
+            glUniformMatrix4fv(glGetUniformLocation(EntityShader->ID, "uModel"),
+                               1,
+                               GL_FALSE,
+                               glm::value_ptr(ModelMat));
+            MaterialHandle = Entity->MaterialHandle;
+            
+        }
+        else
+        {
+            glUseProgram(Shader->ID);
+            glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uModel"),
+                               1,
+                               GL_FALSE,
+                               glm::value_ptr(ModelMat));
+        }
+        
+        // NOTE(Banni): Draw the model
         leor_model *Model = GetItemPointer(Models, Entity->ModelHandle);
         for (int32 i = 0; i < Model->Meshes.Length; i++)
         {

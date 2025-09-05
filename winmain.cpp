@@ -142,6 +142,50 @@ void GlfwProcessInput(GLFWwindow *Window, input *Input)
     LastFrameKeyboard = Input->Keyboard;
 }
 
+inline void
+InitiateGlobals(memory_arena *Arena)
+{
+    GlobalModelsList = {};
+    InitList(Arena, &GlobalModelsList, MAX_MODELS);
+    
+    GlobalScractchArena = GetMemoryArena(Arena, MEGABYTE(10));
+    GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
+}
+
+#if defined(DEBUG)
+inline void
+InitiateGlobalDebugStuff(memory_arena *Arena)
+{
+    GlobalFrameTimesDebugInfo = {};
+    InitList(Arena, &GlobalFrameTimesDebugInfo, MAX_DEBUG_VARIABLES);
+    GlobalDebugState = {};
+    GlobalDebugVariableList = {};
+    InitList(Arena, &GlobalDebugVariableList, MAX_DEBUG_VARIABLES);
+}
+
+void PushDebugTimingInfo(timed_block_info Info)
+{
+    InsertItem(&GlobalFrameTimesDebugInfo, &Info);
+}
+#endif
+
+API_LOAD_SHADER(LoadShaderGlobalRenderer)
+{
+    shader_program Shader = LoadShaderFromFile(VsFilePath, FsFilePath, GlobalScractchArena);
+    InsertItem(&GlobalRenderer.Shaders, &Shader);
+    return GlobalRenderer.Shaders.Length - 1;
+}
+
+API_LOAD_MATERIAL(LoadMaterialGlobalRenderer)
+{
+    renderer_material Material;
+    Material.ShaderHandle = ShaderHandle;
+    Material.Colour = Colour;
+    InsertItem(&GlobalRenderer.Materials, &Material);
+    return GlobalRenderer.Materials.Length - 1;
+}
+
+
 // NOTE(Banni): Platform API implementation
 API_LOAD_L_MODEL(LoadLModelAndUploadToGPU)
 {
@@ -190,40 +234,6 @@ API_SET_COLLISION_MESH(SetCollisionMesh)
         }
     }
     World->GPUHandle = LoadCollisionMeshToGPU(World->CollisionMesh).VaoID;
-}
-
-inline void
-InitiateGlobals(memory_arena *Arena)
-{
-    GlobalModelsList = {};
-    InitList(Arena, &GlobalModelsList, MAX_MODELS);
-    
-    GlobalScractchArena = GetMemoryArena(Arena, MEGABYTE(10));
-    GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
-}
-
-#if defined(DEBUG)
-inline void
-InitiateGlobalDebugStuff(memory_arena *Arena)
-{
-    GlobalFrameTimesDebugInfo = {};
-    InitList(Arena, &GlobalFrameTimesDebugInfo, MAX_DEBUG_VARIABLES);
-    GlobalDebugState = {};
-    GlobalDebugVariableList = {};
-    InitList(Arena, &GlobalDebugVariableList, MAX_DEBUG_VARIABLES);
-}
-
-void PushDebugTimingInfo(timed_block_info Info)
-{
-    InsertItem(&GlobalFrameTimesDebugInfo, &Info);
-}
-#endif
-
-u32 LoadShaderGlobalRenderer(const char* VsFilePath, const char* FsFilePath)
-{
-    shader_program Shader = LoadShaderFromFile(VsFilePath, FsFilePath, GlobalScractchArena);
-    InsertItem(&GlobalRenderer.Shaders, &Shader);
-    return GlobalRenderer.Shaders.Length - 1;
 }
 
 int CALLBACK WinMain(HINSTANCE instance,
@@ -286,10 +296,12 @@ int CALLBACK WinMain(HINSTANCE instance,
                                                             "../assets/shaders/collision_mesh.fs.c",
                                                             GlobalScractchArena);
     
+    // NOTE(Banni): Set up the api to pass to the game DLL
     engine_api Api;
     Api.LoadLModel = &LoadLModelAndUploadToGPU;
     Api.SetCollisionMesh = &SetCollisionMesh;
     Api.LoadShader = &LoadShaderGlobalRenderer;
+    Api.LoadMaterial = &LoadMaterialGlobalRenderer;
     
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();

@@ -138,7 +138,8 @@ function WriteLists() {
         'u32',
         'int32',
         'f32',
-        'leor_primitive_triangle'
+        'leor_primitive_triangle',
+		'renderer_material'
     ];
     let sharedListsSource = GenerateSource(sharedLists);
     let debugListsSource = GenerateSource(debugLists);

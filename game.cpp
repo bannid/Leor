@@ -8,12 +8,16 @@
 
 inline void
 InitializeEntities(game_state *State,
+                   engine_api *Api,
                    renderer_scene *Scene)
 {
     ResetList(&Scene->Entites);
+    
     renderer_entity Player = {};
-    Player.EnityFlags = ENTITY_FLAG_RENDERABLE;
     InitTransform(&Player.Transform);
+    Player.EnityFlags = ENTITY_FLAG_RENDERABLE;
+    Player.MaterialHandle = State->RedMaterial;
+    
     Player.Transform.Position = PLAYER_START_POSITION;
     Player.ModelHandle = State->CubeModel;
     Player.Transform.Scale = v3(.3, 1, .1);
@@ -35,6 +39,16 @@ InitializeEntities(game_state *State,
             InsertItem(&Scene->Entites, &Ground);
         }
     }
+    
+    renderer_entity Box = {};
+    Box.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
+    InitTransform(&Box.Transform);
+    Box.ModelHandle = State->CubeModel;
+    Box.MaterialHandle = Api->LoadMaterial(State->ColourShader, v4(.9, .9, .9, 1.));
+    Box.Transform.Scale = v3(10, 1, 10);
+    Box.Transform.Position = v3(-20, 1, -20);
+    InsertItem(&Scene->Entites, &Box);
+    
 }
 
 DLL_API Game_Update(GameUpdate)
@@ -42,11 +56,19 @@ DLL_API Game_Update(GameUpdate)
     game_state *State = (game_state *)Memory;
     if (!State->Initialized)
     {
+        // NOTE(Banni): Models
         State->CubeModel = Api->LoadLModel("../assetsProcessed/cubeUntextured.obj.lmodel");
         State->HouseModel = Api->LoadLModel("../assetsProcessed/cube.obj.lmodel");
         State->GroundModel = Api->LoadLModel("../assetsProcessed/plane.obj.lmodel");
+        
+        // NOTE(Banni): Shaders
+        State->ColourShader = Api->LoadShader("../assets/shaders/colour.vs.c", "../assets/shaders/colour.fs.c");
+        
+        // NOTE(Banni): Materials
+        State->RedMaterial = Api->LoadMaterial(State->ColourShader, v4(.9, .1, .1, 1.));
+        
         // NOTE(Banni): Initialize the entities
-        InitializeEntities(State, Scene);
+        InitializeEntities(State, Api, Scene);
         State->World->Player.Position = PLAYER_START_POSITION;
         State->World->Player.Velocity = v3(0);
         Api->SetCollisionMesh(Scene->Entites, State->World);
@@ -55,7 +77,7 @@ DLL_API Game_Update(GameUpdate)
     }
     if (State->GameReloaded)
     {
-        InitializeEntities(State, Scene);
+        InitializeEntities(State, Api, Scene);
         State->World->Player.Position = PLAYER_START_POSITION;
         Api->SetCollisionMesh(Scene->Entites, State->World);
         State->GameReloaded = false;

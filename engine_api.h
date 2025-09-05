@@ -19,12 +19,16 @@ typedef API_EXIT_GAME(exit_game);
 #define API_LOAD_SHADER(Name) u32 Name(const char* VsFilePath, const char* FsFilePath)
 typedef API_LOAD_SHADER(load_shader);
 
+#define API_LOAD_MATERIAL(Name) u32 Name(u32 ShaderHandle, v4 Colour)
+typedef API_LOAD_MATERIAL(load_material);
+
 struct engine_api
 {
-    load_l_model*                          LoadLModel;
-    set_collision_mesh*                    SetCollisionMesh;
-    load_shader*                           LoadShader;
-    exit_game*                             ExitGame;
+    load_l_model                          *LoadLModel;
+    set_collision_mesh                    *SetCollisionMesh;
+    load_shader                           *LoadShader;
+    load_material                         *LoadMaterial;
+    exit_game                             *ExitGame;
 };
 
 #endif //ENGINE_API_H

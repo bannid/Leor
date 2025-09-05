@@ -559,3 +559,73 @@ void PopItemFront(leor_primitive_triangle_list* List)
     List->Length--;
 }
     
+void ResetList(renderer_material_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Length = 0;
+}
+    
+void InitList(memory_arena* arena, renderer_material_list* List, u32 Size)
+{
+    ASSERT_DEBUG(!List->Initialized);
+    List->Size = Size;
+    List->Length = 0;
+    List->Items = (renderer_material*)GetMemory(arena,Size * sizeof(renderer_material));
+    List->Initialized = true;
+}
+    
+renderer_material* InsertItem(renderer_material_list* List, renderer_material* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    renderer_material* ptr = List->Items + List->Length++;
+    *ptr = *Item;
+    return ptr;
+}
+    
+renderer_material* GetItemPointer(renderer_material_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    renderer_material* ptr = List->Items + Index;
+    return ptr;
+}
+    
+renderer_material GetItem(renderer_material_list* List,u32 Index)
+{
+    ASSERT_DEBUG(Index < List->Length);
+    renderer_material* ptr = List->Items + Index;
+    return *ptr;
+}
+    
+void DeInitList(renderer_material_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    List->Initialized = false;
+}
+    
+void InsertItemFront(renderer_material_list* List, renderer_material* Item)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    u32 Length = List->Length;
+    for(int32 i = Length - 1; i >= 0; i--)
+    {
+        List->Items[i + 1] = List->Items[i];
+    }
+    List->Items[0] = *Item;
+    List->Length++;
+}
+    
+void PopItemFront(renderer_material_list* List)
+{
+    ASSERT_DEBUG(List->Initialized);
+    ASSERT_DEBUG(List->Length < List->Size);
+    if(List->Length == 0) return;
+    u32 Length = List->Length;
+    for(int32 i = 0; i < Length - 1; i++)
+    {
+        List->Items[i] = List->Items[i + 1];
+    }
+    List->Length--;
+}
+    
