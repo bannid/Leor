@@ -1,6 +1,7 @@
 UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
                                         int32 Width, int32 Height,
                                         const char *WindowTitle,
+                                        memory_arena *Arena,
                                         memory_arena ScratchArena)
 {
     glfwInit();
@@ -33,17 +34,23 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // NOTE(Banni): Load the fonts
-    Renderer->Fonts = FreeTypeLoadFontsFromFile("../assets/fonts/arial.ttf", 16.0f, ScratchArena);
+    Renderer->Fonts = FreeTypeLoadFontsFromFile("../assets/fonts/arial.ttf",
+                                                RENDERER_DEFAULT_FONT_SIZE, ScratchArena);
     
     // NOTE(Banni): Generated from https://tools.irvantaufik.me/newline-to-escape/
     const char* VsSource = "#version 330\n\nlayout (location = 0) in vec3 aPos;\nlayout (location = 1) in vec2 aTex;\n\nuniform mat4 uProjection;\n\nout vec2 fTex;\n\nvoid main()\n{\n    gl_Position = uProjection * vec4(aPos, 1.0f);\n    fTex = aTex;\n}";
     const char* FsSource = "#version 330\n\nin vec2 fTex;\n\nout vec4 finalColor;\n\nuniform vec4 uColour;\nuniform sampler2D uTexture;\n\nvoid main()\n{\n    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(uTexture, fTex).r);\n    finalColor = uColour * sampled;\n}";
     
     
+    // NOTE(Banni): Initialize the lists
+    Renderer->Shaders = {};
+    InitList(Arena, &Renderer->Shaders, RENDERER_MAX_SHADERS);
+    
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
-    Renderer->DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
-                                                 "../assets/shaders/main.fs.c",
-                                                 ScratchArena);
+    shader_program DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
+                                                      "../assets/shaders/main.fs.c",
+                                                      ScratchArena);
+    InsertItem(&Renderer->Shaders, &DefaultShader);
     Renderer->DefaultTexture = LoadTexture("../assets/textures/checker.png", 4, false);
     Renderer->ScreenProjection = glm::ortho(0.0f, (f32)Width,
                                             0.0f, (f32)Height,
@@ -144,7 +151,8 @@ void DrawScene(renderer *Renderer,
                glm::mat4 *Projection,
                leor_model_list *Models)
 {
-    shader_program *Shader = &Renderer->DefaultShader;
+    // NOTE(Banni): The first shader is the default shader
+    shader_program *Shader = GetItemPointer(&Renderer->Shaders, 0);
     glClearColor(.0, .0, .0, .0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     

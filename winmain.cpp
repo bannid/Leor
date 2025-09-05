@@ -28,7 +28,6 @@
 global memory_arena                                    GlobalScractchArena;
 global memory_arena                                    GlobalModelsMemoryArena;
 global leor_model_list                                 GlobalModelsList;
-global shader_program_list                             GlobalShadersList;
 global renderer                                        GlobalRenderer;
 
 // NOTE(Banni): Global flags for Debugging i.e. If we should render collison mesh, frame times and stuff.
@@ -80,7 +79,6 @@ global debug_variable_list GlobalDebugVariableList;
 
 #define MAX_TRIANGLES_IN_COLLISION_MESH              10000
 #define MAX_MODELS                                   200
-#define MAX_SHADERS                                  200
 #define MAX_ENTITIES                                 200
 #define MAX_DEBUG_VARIABLES                          200
 
@@ -200,9 +198,6 @@ InitiateGlobals(memory_arena *Arena)
     GlobalModelsList = {};
     InitList(Arena, &GlobalModelsList, MAX_MODELS);
     
-    GlobalShadersList = {};
-    InitList(Arena, &GlobalShadersList, MAX_SHADERS);
-    
     GlobalScractchArena = GetMemoryArena(Arena, MEGABYTE(10));
     GlobalModelsMemoryArena = GetMemoryArena(Arena, MEGABYTE(10));
 }
@@ -223,6 +218,13 @@ void PushDebugTimingInfo(timed_block_info Info)
     InsertItem(&GlobalFrameTimesDebugInfo, &Info);
 }
 #endif
+
+u32 LoadShaderGlobalRenderer(const char* VsFilePath, const char* FsFilePath)
+{
+    shader_program Shader = LoadShaderFromFile(VsFilePath, FsFilePath, GlobalScractchArena);
+    InsertItem(&GlobalRenderer.Shaders, &Shader);
+    return GlobalRenderer.Shaders.Length - 1;
+}
 
 int CALLBACK WinMain(HINSTANCE instance,
                      HINSTANCE prevInstance,
@@ -247,7 +249,11 @@ int CALLBACK WinMain(HINSTANCE instance,
     
     // NOTE(Banni): Initialize the renderer
     
-    b32 Running = InitializeRenderer(&GlobalRenderer, WIDTH, HEIGHT, "Leor", GlobalScractchArena);
+    b32 Running = InitializeRenderer(&GlobalRenderer,
+                                     WIDTH, HEIGHT,
+                                     "Leor",
+                                     &MainMemoryArena,
+                                     GlobalScractchArena);
     ASSERT_DEBUG(Running);
     
     // NOTE(Banni): Initialize the world
@@ -283,6 +289,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     engine_api Api;
     Api.LoadLModel = &LoadLModelAndUploadToGPU;
     Api.SetCollisionMesh = &SetCollisionMesh;
+    Api.LoadShader = &LoadShaderGlobalRenderer;
     
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
@@ -301,14 +308,6 @@ int CALLBACK WinMain(HINSTANCE instance,
         {
             Win32UnloadGameDLL(&GameCode);
             GameCode = Win32LoadGameDLL(true);
-            // TODO(Banni): Temp code. Reload the shader.
-            GlobalRenderer.DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
-                                                              "../assets/shaders/main.fs.c",
-                                                              GlobalScractchArena);
-            
-            CollisionMeshShader = LoadShaderFromFile("../assets/shaders/collision_mesh.vs.c",
-                                                     "../assets/shaders/collision_mesh.fs.c",
-                                                     GlobalScractchArena);
             GameState->GameReloaded = true;
         }
         

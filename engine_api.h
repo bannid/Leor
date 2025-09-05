@@ -16,7 +16,7 @@ typedef API_SET_COLLISION_MESH(set_collision_mesh);
 #define API_EXIT_GAME(Name) void Name()
 typedef API_EXIT_GAME(exit_game);
 
-#define API_LOAD_SHADER(Name) void Name(const char* VsFilePath, const char* FsFilePath)
+#define API_LOAD_SHADER(Name) u32 Name(const char* VsFilePath, const char* FsFilePath)
 typedef API_LOAD_SHADER(load_shader);
 
 struct engine_api

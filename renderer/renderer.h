@@ -13,6 +13,9 @@
 #include "camera.h"
 #include "material.h"
 
+#define RENDERER_MAX_SHADERS 200
+#define RENDERER_DEFAULT_FONT_SIZE 20
+
 struct renderer
 {
     GLFWwindow*                            Window;
@@ -21,10 +24,10 @@ struct renderer
     const char*                            WindowTitle;
     font_type                              Fonts;
     shader_program                         FontShader;
-    shader_program                         DefaultShader;
     u32                                    DefaultTexture;
     glm::mat4                              ScreenProjection;
     gl_model                               FontModel;
+    shader_program_list                    Shaders;
 };
 
 #endif //RENDERER_H
