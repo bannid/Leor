@@ -5,8 +5,9 @@
 
 struct renderer_material
 {
-    u32 ShaderHandle;
-    v4 Colour;
+    u32                             ShaderHandle;
+    u32                             TextureHandle;
+    v4                              Colour;
 };
 
 DECLARE_LIST(renderer_material);

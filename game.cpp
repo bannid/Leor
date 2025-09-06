@@ -27,6 +27,8 @@ InitializeEntities(game_state *State,
     Ground.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
     InitTransform(&Ground.Transform);
     Ground.ModelHandle = State->GroundModel;
+    Ground.MaterialHandle = Api->LoadMaterial(State->TexturedShader, v4(.1, .5, .1, 1.), State->NoiseTexture);
+    
     v3 GroundStart = v3(10, 0, 10);
     Ground.Transform.Scale = v3(METER(5), METER(5), METER(5));
     for(int32 x = 0; x < 10; x++)
@@ -44,7 +46,9 @@ InitializeEntities(game_state *State,
     Box.EnityFlags = ENTITY_FLAG_RENDERABLE | ENTITY_FLAG_COLLIDEABLE;
     InitTransform(&Box.Transform);
     Box.ModelHandle = State->CubeModel;
-    Box.MaterialHandle = Api->LoadMaterial(State->ColourShader, v4(.9, .9, .9, 1.));
+    
+    Box.MaterialHandle = Api->LoadMaterial(State->TexturedShader, v4(.4, .2, .1, 1.), State->NoiseTexture);
+    
     Box.Transform.Scale = v3(10, 1, 10);
     Box.Transform.Position = v3(-20, 1, -20);
     InsertItem(&Scene->Entites, &Box);
@@ -63,9 +67,13 @@ DLL_API Game_Update(GameUpdate)
         
         // NOTE(Banni): Shaders
         State->ColourShader = Api->LoadShader("../assets/shaders/colour.vs.c", "../assets/shaders/colour.fs.c");
+        State->TexturedShader = Api->LoadShader("../assets/shaders/texture.vs.c", "../assets/shaders/texture.fs.c");
+        
+        // NOTE(Banni): Textures
+        State->NoiseTexture = Api->LoadTexture("../assets/textures/noise.png", 4, false);
         
         // NOTE(Banni): Materials
-        State->RedMaterial = Api->LoadMaterial(State->ColourShader, v4(.9, .1, .1, 1.));
+        State->RedMaterial = Api->LoadMaterial(State->ColourShader, v4(.9, .1, .1, 1.), 0);
         
         // NOTE(Banni): Initialize the entities
         InitializeEntities(State, Api, Scene);

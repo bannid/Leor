@@ -6,11 +6,4 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-struct texture
-{
-    u32 ID;
-    u32 Width;
-    u32 Height;
-};
-
 #endif //TEXTURE_H

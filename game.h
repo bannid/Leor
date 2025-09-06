@@ -19,9 +19,12 @@ struct game_state
     u32                                                 HouseModel;
     u32                                                 GroundModel;
     
-    // TODO(Banni): Temp shader
+    // TODO(Banni): Temp shader and texture handles
     u32                                                 ColourShader;
+    u32                                                 TexturedShader;
     u32                                                 RedMaterial;
+    u32                                                 NoiseTexture;
+    
     // NOTE(Banni): Simulation
     leor_physics_world*                                 World;
     renderer_entity*                                    Player;

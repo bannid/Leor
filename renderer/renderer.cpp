@@ -1,8 +1,9 @@
-UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
-                                        int32 Width, int32 Height,
-                                        const char *WindowTitle,
-                                        memory_arena *Arena,
-                                        memory_arena ScratchArena)
+UsesScratchArena b32 
+InitializeRenderer(renderer *Renderer,
+                   int32 Width, int32 Height,
+                   const char *WindowTitle,
+                   memory_arena *Arena,
+                   memory_arena ScratchArena)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -42,11 +43,16 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     const char* FsSource = "#version 330\n\nin vec2 fTex;\n\nout vec4 finalColor;\n\nuniform vec4 uColour;\nuniform sampler2D uTexture;\n\nvoid main()\n{\n    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(uTexture, fTex).r);\n    finalColor = uColour * sampled;\n}";
     
     
+    // NOTE(Banni): Grab the memory arenas
+    Renderer->Arena = GetMemoryArena(Arena, MEGABYTE(100));
+    
     // NOTE(Banni): Initialize the lists
     Renderer->Shaders = {};
     Renderer->Materials = {};
-    InitList(Arena, &Renderer->Shaders, RENDERER_MAX_SHADERS);
-    InitList(Arena, &Renderer->Materials, RENDERER_MAX_MATERIALS);
+    Renderer->Textures = {};
+    InitList(&Renderer->Arena, &Renderer->Shaders, RENDERER_MAX_SHADERS);
+    InitList(&Renderer->Arena, &Renderer->Materials, RENDERER_MAX_MATERIALS);
+    InitList(&Renderer->Arena, &Renderer->Textures, RENDERER_MAX_TEXTURES);
     
     Renderer->FontShader = LoadShader((char*)VsSource, (char*)FsSource);
     shader_program DefaultShader = LoadShaderFromFile("../assets/shaders/main.vs.c",
@@ -66,7 +72,8 @@ UsesScratchArena b32 InitializeRenderer(renderer *Renderer,
     return true;
 }
 
-void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text, v4 Colour)
+void 
+DrawText(renderer *Renderer, glm::vec2 Position, const char* Text, v4 Colour)
 {
     ASSERT_DEBUG(Renderer->FontShader.Valid);
     
@@ -134,7 +141,8 @@ void DrawText(renderer *Renderer, glm::vec2 Position, const char* Text, v4 Colou
     
 }
 
-f32 MeasureTextWidthDefault(renderer* Renderer, const char* Label)
+f32
+MeasureTextWidthDefault(renderer* Renderer, const char* Label)
 {
     
     char C;
@@ -148,7 +156,8 @@ f32 MeasureTextWidthDefault(renderer* Renderer, const char* Label)
     return(Result);
 }
 
-b32 RendererRunning(renderer *Renderer)
+b32 
+RendererRunning(renderer *Renderer)
 {
     return !glfwWindowShouldClose(Renderer->Window);
 }
@@ -165,6 +174,7 @@ DrawScene(renderer *Renderer,
     // NOTE(Banni): The first shader is the default shader
     shader_program *Shader = GetItemPointer(&Renderer->Shaders, 0);
     glm::mat4 ViewMat = GetViewMatrix(&Scene->ThirdPersonCamera);
+    
     glUseProgram(Shader->ID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, Renderer->DefaultTexture);
@@ -189,6 +199,8 @@ DrawScene(renderer *Renderer,
         {
             renderer_material *Material = GetItemPointer(&Renderer->Materials, Entity->MaterialHandle);
             shader_program* EntityShader = GetItemPointer(&Renderer->Shaders, Material->ShaderHandle);
+            u32 EntityTexture = GetItem(&Renderer->Textures, Material->TextureHandle);
+            
             glUseProgram(EntityShader->ID);
             
             // NOTE(Banni): Small performance improvement. If we updated this material iteration,
@@ -207,6 +219,11 @@ DrawScene(renderer *Renderer,
                 glUniform4fv(glGetUniformLocation(EntityShader->ID, "uColour"),
                              1,
                              (f32*)&Material->Colour);
+                
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, EntityTexture);
+                glUniform1i(glGetUniformLocation(Shader->ID, "uTexture"), 0);
+                
             }
             glUniformMatrix4fv(glGetUniformLocation(EntityShader->ID, "uModel"),
                                1,
@@ -218,6 +235,10 @@ DrawScene(renderer *Renderer,
         else
         {
             glUseProgram(Shader->ID);
+            glUseProgram(Shader->ID);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, Renderer->DefaultTexture);
+            glUniform1i(glGetUniformLocation(Shader->ID, "uTexture"), 0);
             glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uModel"),
                                1,
                                GL_FALSE,
@@ -235,11 +256,12 @@ DrawScene(renderer *Renderer,
     }
 }
 
-void DrawCollisionMesh(renderer *Renderer,
-                       shader_program *Shader,
-                       leor_physics_world *World,
-                       glm::mat4 *ViewMat,
-                       glm::mat4 *Projection)
+void 
+DrawCollisionMesh(renderer *Renderer,
+                  shader_program *Shader,
+                  leor_physics_world *World,
+                  glm::mat4 *ViewMat,
+                  glm::mat4 *Projection)
 {
     glUseProgram(Shader->ID);
     glUniformMatrix4fv(glGetUniformLocation(Shader->ID, "uProjection"),

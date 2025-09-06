@@ -7,6 +7,7 @@
 #include "opengl/model.h"
 #include "opengl/shader.h"
 #include "opengl/texture.h"
+#include "renderer_internals.h"
 #include "fonts.h"
 #include "model.h"
 #include "scene.h"
@@ -16,13 +17,14 @@
 #define RENDERER_MAX_SHADERS                        200
 #define RENDERER_DEFAULT_FONT_SIZE                  20
 #define RENDERER_MAX_MATERIALS                      200
+#define RENDERER_MAX_TEXTURES                       500
 
 struct renderer
 {
-    GLFWwindow*                            Window;
+    GLFWwindow                            *Window;
     int32                                  Width;
     int32                                  Height;
-    const char*                            WindowTitle;
+    const char                            *WindowTitle;
     font_type                              Fonts;
     shader_program                         FontShader;
     u32                                    DefaultTexture;
@@ -30,6 +32,10 @@ struct renderer
     gl_model                               FontModel;
     shader_program_list                    Shaders;
     renderer_material_list                 Materials;
+    u32_list                               Textures;
+    
+    // NOTE(Banni): Just grab some memory for later use
+    memory_arena                           Arena;
 };
 
 #endif //RENDERER_H

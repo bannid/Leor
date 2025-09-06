@@ -12,6 +12,7 @@
 
 #include "types.h"
 #include "utils.h"
+#include "strings.h"
 #include "lists.h"
 #include "debug.h"
 #include "debug_internal.h"
@@ -181,10 +182,17 @@ API_LOAD_MATERIAL(LoadMaterialGlobalRenderer)
     renderer_material Material;
     Material.ShaderHandle = ShaderHandle;
     Material.Colour = Colour;
+    Material.TextureHandle = TextureHandle;
     InsertItem(&GlobalRenderer.Materials, &Material);
     return GlobalRenderer.Materials.Length - 1;
 }
 
+API_LOAD_TEXTURE(LoadTextureGlobalRenderer)
+{
+    u32 TextureID = LoadTexture(FilePath, DesiredChannels, Flip);
+    InsertItem(&GlobalRenderer.Textures, &TextureID);
+    return GlobalRenderer.Textures.Length - 1;
+}
 
 // NOTE(Banni): Platform API implementation
 API_LOAD_L_MODEL(LoadLModelAndUploadToGPU)
@@ -302,6 +310,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     Api.SetCollisionMesh = &SetCollisionMesh;
     Api.LoadShader = &LoadShaderGlobalRenderer;
     Api.LoadMaterial = &LoadMaterialGlobalRenderer;
+    Api.LoadTexture = &LoadTextureGlobalRenderer;
     
     f32 DeltaTime = 1.0f / 75.0f;
     f32 CurrentTime = glfwGetTime();
@@ -315,6 +324,7 @@ int CALLBACK WinMain(HINSTANCE instance,
     
     while (1)
     {
+        TIMED_BLOCK_START(RenderLoop);
         FILETIME NewDllWriteTime = Win32GetLastWriteTime(GAME_DLL_NAME);
         if (CompareFileTime(&NewDllWriteTime, &GameCode.LastWriteTime) != 0)
         {
@@ -370,6 +380,7 @@ int CALLBACK WinMain(HINSTANCE instance,
         {
             break;
         }
+        TIMED_BLOCK_END(RenderLoop);
     }
     return 0;
 }
