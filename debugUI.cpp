@@ -1,3 +1,5 @@
+
+
 inline void
 MoveCursor(debug_ui* Ui, f32 Length)
 {
@@ -65,58 +67,57 @@ DebugUI_Button(debug_ui* Ui, const char* Label)
 internal void
 DrawDebugUI(debug_ui* Ui, input* Input)
 {
-    Ui->Cursor = v2(10, GlobalRenderer.Height - 20.0f);
-    if(DebugUI_Button(Ui, "Collision mesh"))
-    {
-        GlobalDebugState.DrawCollisionMesh = !GlobalDebugState.DrawCollisionMesh;
-    }
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
     
-    if(DebugUI_Button(Ui, "Debug Info"))
+    ImGui::Begin("Timings info");
+    char BufferToPrintStuff[256];
+    // TODO(Banni): print out the debug info to the screen
+    for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
     {
-        GlobalDebugState.DrawDebugInfo = !GlobalDebugState.DrawDebugInfo;
+        timed_block_info *DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
+        snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms", DebugInfo->Name, DebugInfo->TimeTook);
+        ImGui::Text(BufferToPrintStuff);
     }
-    
-    if(GlobalDebugState.DrawDebugInfo)
+    ImGui::End();
+    ImGui::Begin("Variables");
+    for (int32 i = 0; i < GlobalDebugVariableList.Length; i++)
     {
-        char BufferToPrintStuff[256];
-        // TODO(Banni): print out the debug info to the screen
-        for (int32 i = 0; i < GlobalFrameTimesDebugInfo.Length; i++)
+        debug_variable *Variable = GetItemPointer(&GlobalDebugVariableList, i);
+        switch(Variable->Type)
         {
-            timed_block_info *DebugInfo = GetItemPointer(&GlobalFrameTimesDebugInfo, i);
-            snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff), "%s: %.2f ms", DebugInfo->Name, DebugInfo->TimeTook);
-            DebugUI_Label(Ui, (const char*)BufferToPrintStuff);
-        }
-        
-        // TODO(Banni): print out the debug info to the screen
-        for (int32 i = 0; i < GlobalDebugVariableList.Length; i++)
-        {
-            debug_variable *Variable = GetItemPointer(&GlobalDebugVariableList, i);
-            switch(Variable->Type)
+            case Debug_Variable_Type_V3:
             {
-                case Debug_Variable_Type_V3:
-                {
-                    v3* Pointer = (v3*)Variable->Pointer;
-                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
-                             "%s: (%.2f,%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y, Pointer->z);
-                }break;
-                
-                case Debug_Variable_Type_V2:
-                {
-                    v2* Pointer = (v2*)Variable->Pointer;
-                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
-                             "%s: (%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y);
-                }break;
-                
-                case Debug_Variable_Type_Int32:
-                {
-                    int32 *Pointer = (int32*)Variable->Pointer;
-                    snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
-                             "%s: %d", Variable->Name, *Pointer);
-                }break;
-            }
-            DebugUI_Label(Ui, (const char*)BufferToPrintStuff);
+                v3* Pointer = (v3*)Variable->Pointer;
+                snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
+                         "%s: (%.2f,%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y, Pointer->z);
+            }break;
+            
+            case Debug_Variable_Type_V2:
+            {
+                v2* Pointer = (v2*)Variable->Pointer;
+                snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
+                         "%s: (%.2f,%.2f)", Variable->Name, Pointer->x, Pointer->y);
+            }break;
+            
+            case Debug_Variable_Type_Int32:
+            {
+                int32 *Pointer = (int32*)Variable->Pointer;
+                snprintf(BufferToPrintStuff, sizeof(BufferToPrintStuff),
+                         "%s: %d", Variable->Name, *Pointer);
+            }break;
         }
+        ImGui::Text(BufferToPrintStuff);
     }
-    ResetList(&GlobalFrameTimesDebugInfo);
+    
+    ImGui::End();
+    
     ResetList(&GlobalDebugVariableList);
+    ResetList(&GlobalFrameTimesDebugInfo);
+    
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    
 }

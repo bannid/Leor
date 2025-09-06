@@ -7,7 +7,7 @@ rem Libs
 rem Includes
 
 
-set FilesWin32Engine= ..\winmain.cpp
+set FilesWin32Engine= ..\winmain.cpp ..\include\imgui\plugin.cpp
 set FileFBXImporter= ..\assetProcessing\fbxImporter.cpp
 set Includes= ..\include
 set LibsPath=/LIBPATH:"..\lib\"

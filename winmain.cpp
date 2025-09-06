@@ -10,6 +10,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include "types.h"
 #include "utils.h"
 #include "strings.h"
@@ -244,6 +248,24 @@ API_SET_COLLISION_MESH(SetCollisionMesh)
     World->GPUHandle = LoadCollisionMeshToGPU(World->CollisionMesh).VaoID;
 }
 
+void ImguiInit(GLFWwindow * window){
+    
+}
+void ImguiNewFrame(){
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+void ImguiRender(){
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+void ImguiExit(){
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
 int CALLBACK WinMain(HINSTANCE instance,
                      HINSTANCE prevInstance,
                      LPSTR commandLine,
@@ -317,6 +339,15 @@ int CALLBACK WinMain(HINSTANCE instance,
     f32 LastTime = CurrentTime;
     
 #if defined(DEBUG)
+    
+    // NOTE(Banni): IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(GlobalRenderer.Window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+    
     debug_ui Ui;
     Ui.Flow = Debug_Ui_Flow_Vertical;
     Ui.Input = &Input;
@@ -373,6 +404,7 @@ int CALLBACK WinMain(HINSTANCE instance,
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         DrawDebugUI(&Ui, &Input);
+        
 #endif
         glfwSwapBuffers(GlobalRenderer.Window);
         glfwPollEvents();
@@ -382,5 +414,6 @@ int CALLBACK WinMain(HINSTANCE instance,
         }
         TIMED_BLOCK_END(RenderLoop);
     }
+    
     return 0;
 }
